@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuralAlpha — Content Intelligence v3</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06080d;--surface:#0b0f18;--card:#0f1420;--border:#181f2e;--border2:#1e2840;
+  --accent:#00e5ff;--accent2:#7b61ff;--green:#00ff88;--red:#ff3d5a;--warn:#ffb700;
+  --text:#dce6f5;--muted:#3d4f6e;--muted2:#5a6e8a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,0.01) 2px,rgba(0,229,255,0.01) 4px);pointer-events:none;z-index:9999;}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 15% 10%,rgba(0,229,255,0.05) 0%,transparent 45%),radial-gradient(ellipse at 85% 90%,rgba(123,97,255,0.05) 0%,transparent 45%);pointer-events:none;z-index:0;}
+.shell{display:flex;min-height:100vh;position:relative;z-index:1;}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;line-height:1;}
+.logo-mark span{color:var(--accent);}
+.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;margin-top:3px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted2);transition:all .15s;border-left:2px solid transparent;letter-spacing:.3px;}
+.nav-item:hover{color:var(--text);background:rgba(0,229,255,0.03);}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,229,255,0.05);}
+.nav-icon{font-size:15px;width:18px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+.live-dot{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);}
+.live-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.main{flex:1;overflow-y:auto;}
+.topbar{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(11,15,24,0.9);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;}
+.price-strip{display:flex;gap:8px;flex-wrap:wrap;}
+.pp{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;background:var(--card);border:1px solid var(--border2);}
+.pp .sym{color:var(--muted2);margin-right:3px;}
+.pp .val{color:var(--text);}
+.pp .chg{margin-left:4px;}
+.up{color:var(--green);}.dn{color:var(--red);}
+.content{padding:24px;}
+.panel{display:none;}.panel.active{display:block;}
+.section-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:5px;}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:18px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.12),transparent);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.metric-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
+.metric-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.metric-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Barlow',sans-serif;letter-spacing:.8px;text-transform:uppercase;transition:all .18s;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{box-shadow:0 0 18px rgba(0,229,255,.35);transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted2);}
+.btn-ar{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.3);color:var(--warn);font-size:11px;padding:6px 12px;}
+.btn-ar:hover{background:rgba(255,183,0,.18);}
+.btn-img{background:rgba(123,97,255,.1);border:1px solid rgba(123,97,255,.3);color:var(--accent2);}
+.btn-img:hover{background:rgba(123,97,255,.2);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:1px;display:block;margin-bottom:4px;}
+input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:11px;outline:none;transition:border-color .15s;}
+input:focus,textarea:focus,select:focus{border-color:rgba(0,229,255,.35);}
+textarea{min-height:70px;resize:vertical;}
+select option{background:var(--surface);}
+.sig-row{display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:5px;font-size:13px;}
+.sig-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sig-dot.bull{background:var(--green);box-shadow:0 0 6px var(--green);}
+.sig-dot.bear{background:var(--red);box-shadow:0 0 6px var(--red);}
+.sig-dot.neut{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.post-wrap{margin-bottom:18px;}
+.post-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;flex-wrap:wrap;gap:6px;}
+.post-platform{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:500;}
+.platform-x{color:var(--text);}.platform-ig{color:#e1306c;}.platform-ar{color:var(--warn);}
+.post-actions{display:flex;gap:6px;align-items:center;}
+.post-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;min-height:80px;}
+.post-box.arabic{direction:rtl;text-align:right;font-size:13px;line-height:2;}
+.copy-btn{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);color:var(--accent);cursor:pointer;letter-spacing:1px;transition:all .15s;}
+.copy-btn:hover{background:rgba(0,229,255,.12);}
+.img-preview{width:100%;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none;}
+.img-placeholder{background:var(--surface);border:1px dashed var(--border2);border-radius:8px;padding:20px;text-align:center;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;margin-top:10px;display:none;}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+.day-col{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 8px;min-height:110px;}
+.day-col.today{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.03);}
+.day-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted2);margin-bottom:7px;text-align:center;}
+.day-col.today .day-name{color:var(--accent);}
+.day-tag{display:block;font-size:10px;padding:3px 5px;border-radius:4px;margin-bottom:3px;line-height:1.4;font-weight:600;}
+.tag-x{background:rgba(220,230,245,.06);color:var(--text);}
+.tag-ig{background:rgba(225,48,108,.08);color:#e1306c;}
+.ld{display:inline-flex;gap:4px;align-items:center;}
+.ld span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:ld .6s infinite alternate;}
+.ld span:nth-child(2){animation-delay:.15s}.ld span:nth-child(3){animation-delay:.3s}
+@keyframes ld{from{opacity:.2;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+.div{border:none;border-top:1px solid var(--border);margin:20px 0;}
+.alert{padding:9px 13px;border-radius:6px;font-size:11px;margin-bottom:14px;border-left:2px solid;font-family:'DM Mono',monospace;line-height:1.6;}
+.alert-info{background:rgba(0,229,255,.04);border-color:var(--accent);color:var(--muted2);}
+.alert-warn{background:rgba(255,183,0,.04);border-color:var(--warn);color:var(--warn);}
+.alert-ok{background:rgba(0,255,136,.04);border-color:var(--green);color:var(--green);}
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;letter-spacing:1px;}
+.tag-bull{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+.tag-bear{background:rgba(255,61,90,.08);color:var(--red);border:1px solid rgba(255,61,90,.2);}
+.hashtag-box{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.htag{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.15);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;padding:3px 9px;border-radius:4px;cursor:pointer;transition:all .15s;}
+.htag:hover{background:rgba(0,229,255,.15);}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.history-item:hover{border-color:rgba(0,229,255,.3);}
+.history-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:5px;}
+.history-preview{font-size:12px;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.timer-display{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent);letter-spacing:3px;}
+.key-wrap{position:relative;}
+.key-wrap input{padding-right:70px;margin-bottom:0;}
+.key-tog{position:absolute;right:10px;top:9px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);cursor:pointer;background:none;border:none;letter-spacing:1px;}
+@media(max-width:900px){.sidebar{display:none;}.g2,.g3,.g4,.g6{grid-template-columns:1fr;}.week-grid{grid-template-columns:repeat(3,1fr);}.price-strip{display:none;}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Neural<span>Alpha</span></div>
+    <div class="logo-sub">CONTENT INTELLIGENCE v3</div>
+  </div>
+  <div class="nav-item active" onclick="nav(this,'live','Live Marked')"><span class="nav-icon">📡</span> Live Marked</div>
+  <div class="nav-item" onclick="nav(this,'today','Dagens Posts')"><span class="nav-icon">✍️</span> Dagens Posts</div>
+  <div class="nav-item" onclick="nav(this,'planner','Ugeplanner')"><span class="nav-icon">📅</span> Ugeplanner</div>
+  <div class="nav-item" onclick="nav(this,'history','Post Historik')"><span class="nav-icon">📁</span> Post Historik</div>
+  <div class="nav-item" onclick="nav(this,'timer','Post Timer')"><span class="nav-icon">⏱️</span> Post Timer</div>
+  <div class="nav-item" onclick="nav(this,'settings','Indstillinger')"><span class="nav-icon">⚙️</span> Indstillinger</div>
+  <div class="sidebar-bottom">
+    <div class="live-dot" id="live-status">HENTER PRISER...</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">LIVE MARKED</div>
+    <div class="price-strip" id="price-strip"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- LIVE MARKED -->
+    <div id="panel-live" class="panel active">
+      <div class="section-label">Real-time data — auto-opdateret hvert 5. minut</div>
+      <div class="section-title">LIVE MARKEDSDATA</div>
+      <div id="price-alert" class="alert alert-info">⏳ Henter live priser fra CoinGecko...</div>
+      <div class="g6" id="metrics-row" style="margin-bottom:18px;"></div>
+      <div class="g2">
+        <div class="card">
+          <div class="section-label" style="margin-bottom:8px;">MARKET SIGNALS</div>
+          <div id="signals-list"></div>
+        </div>
+        <div class="card">
+          <div class="section-label" style="margin-bottom:8px;">AI MARKEDSVURDERING</div>
+          <div id="ai-assess" style="font-size:13px;line-height:1.8;color:var(--muted2);">Klik analysér for AI-vurdering.</div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+            <button class="btn btn-primary btn-sm" onclick="runAnalysis()" id="analyze-btn">⚡ Analysér</button>
+            <div id="analyze-ld" style="display:none;"><div class="ld"><span></span><span></span><span></span></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="fetchPrices()">↻ Opdater priser</button>
+      </div>
+    </div>
+
+    <!-- DAGENS POSTS -->
+    <div id="panel-today" class="panel">
+      <div class="section-label">Baseret på ugeplanen + live data</div>
+      <div class="section-title">DAGENS POSTS</div>
+
+      <div class="g2" style="margin-bottom:14px;">
+        <div class="card">
+          <div class="section-label" style="margin-bottom:6px;">DAGENS TEMA</div>
+          <div id="today-theme" style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:5px;"></div>
+          <div id="today-desc" style="font-size:12px;color:var(--muted2);line-height:1.7;"></div>
+        </div>
+        <div class="card">
+          <div class="section-label" style="margin-bottom:6px;">INDSTILLINGER</div>
+          <label>Content type</label>
+          <select id="post-type">
+            <option value="auto">🤖 Auto (følg ugeplanen)</option>
+            <option value="alpha">🔥 Alpha Signal</option>
+            <option value="onchain">📊 On-chain Analyse</option>
+            <option value="macro">🌍 Makro + Geopolitik</option>
+            <option value="ai">🤖 AI & Tech</option>
+            <option value="educational">📚 Educational</option>
+            <option value="recap">📋 Weekly Recap</option>
+          </select>
+          <label>Ekstra kontekst (valgfri)</label>
+          <textarea id="extra-ctx" placeholder="Specifikt emne, token, narrativ..."></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-primary" id="gen-btn" onclick="generatePosts()">⚡ Generer alle posts</button>
+        <div id="gen-ld" style="display:none;align-items:center;"><div class="ld"><span></span><span></span><span></span></div></div>
+      </div>
+
+      <div id="posts-out" style="display:none;">
+        <hr class="div">
+
+        <!-- X POST 1 -->
+        <div class="post-wrap">
+          <div class="post-header">
+            <div class="post-platform platform-x">𝕏 MORGEN POST — 08:00</div>
+            <div class="post-actions">
+              <button class="btn btn-img btn-sm" onclick="genImage('x1','morgen market update')">🖼️ Generer billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x1','ar1')">🌐 Oversæt til Arabisk</button>
+              <button class="copy-btn" onclick="cp('x1')">COPY</button>
+            </div>
+          </div>
+          <div class="post-box" id="x1"></div>
+          <div class="img-placeholder" id="img-x1">🖼️ Billede genereres via Gemini Imagen...</div>
+          <img class="img-preview" id="imgprev-x1" alt="Generated image">
+          <div class="post-box arabic" id="ar1" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <!-- X POST 2 -->
+        <div class="post-wrap">
+          <div class="post-header">
+            <div class="post-platform platform-x">𝕏 EFTERMIDDAG POST — 14:00</div>
+            <div class="post-actions">
+              <button class="btn btn-img btn-sm" onclick="genImage('x2','crypto market afternoon')">🖼️ Generer billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x2','ar2')">🌐 Oversæt til Arabisk</button>
+              <button class="copy-btn" onclick="cp('x2')">COPY</button>
+            </div>
+          </div>
+          <div class="post-box" id="x2"></div>
+          <div class="img-placeholder" id="img-x2"></div>
+          <img class="img-preview" id="imgprev-x2" alt="Generated image">
+          <div class="post-box arabic" id="ar2" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <!-- X POST 3 -->
+        <div class="post-wrap">
+          <div class="post-header">
+            <div class="post-platform platform-x">𝕏 AFTEN POST — 20:00</div>
+            <div class="post-actions">
+              <button class="btn btn-img btn-sm" onclick="genImage('x3','crypto evening deep analysis')">🖼️ Generer billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x3','ar3')">🌐 Oversæt til Arabisk</button>
+              <button class="copy-btn" onclick="cp('x3')">COPY</button>
+            </div>
+          </div>
+          <div class="post-box" id="x3"></div>
+          <div class="img-placeholder" id="img-x3"></div>
+          <img class="img-preview" id="imgprev-x3" alt="Generated image">
+          <div class="post-box arabic" id="ar3" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <!-- INSTAGRAM -->
+        <div class="post-wrap">
+          <div class="post-header">
+            <div class="post-platform platform-ig">📸 INSTAGRAM CAPTION + HASHTAGS</div>
+            <div class="post-actions">
+              <button class="btn btn-img btn-sm" onclick="genImage('ig1','instagram crypto carousel visual')">🖼️ Generer billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('ig1','ar-ig')">🌐 Oversæt til Arabisk</button>
+              <button class="copy-btn" onclick="cp('ig1')">COPY</button>
+            </div>
+          </div>
+          <div class="post-box" id="ig1"></div>
+          <div class="img-placeholder" id="img-ig1"></div>
+          <img class="img-preview" id="imgprev-ig1" alt="Generated image">
+          <div class="post-box arabic" id="ar-ig" style="display:none;margin-top:8px;"></div>
+        </div>
+
+        <!-- HASHTAG OPTIMIZER -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="section-label" style="margin-bottom:8px;">🏷️ HASHTAG OPTIMIZER</div>
+          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;">Klik for at kopiere individuelle hashtags:</div>
+          <div class="hashtag-box" id="hashtags"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="generatePosts()">↻ Regenerer</button>
+          <button class="btn btn-primary btn-sm" onclick="savePosts()">💾 Gem til historik</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UGEPLANNER -->
+    <div id="panel-planner" class="panel">
+      <div class="section-label">NeuralAlpha Content Strategi</div>
+      <div class="section-title">UGEPLANNER</div>
+      <div class="week-grid" id="week-grid" style="margin-bottom:20px;"></div>
+      <hr class="div">
+      <div class="section-label" style="margin-bottom:10px;">DETALJERET UGEPLAN</div>
+      <div id="week-detail"></div>
+    </div>
+
+    <!-- POST HISTORIK -->
+    <div id="panel-history" class="panel">
+      <div class="section-label">Gemte posts</div>
+      <div class="section-title">POST HISTORIK</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="clearHistory()">🗑️ Ryd historik</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- POST TIMER -->
+    <div id="panel-timer" class="panel">
+      <div class="section-label">Næste optimale postetidspunkt</div>
+      <div class="section-title">POST TIMER</div>
+      <div class="g3">
+        <div class="card" style="text-align:center;">
+          <div class="section-label" style="margin-bottom:8px;">𝕏 MORGEN POST</div>
+          <div class="timer-display" id="t-morning">--:--:--</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 08:00</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="section-label" style="margin-bottom:8px;">𝕏 EFTERMIDDAG</div>
+          <div class="timer-display" id="t-afternoon">--:--:--</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 14:00</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div class="section-label" style="margin-bottom:8px;">𝕏 AFTEN + INSTAGRAM</div>
+          <div class="timer-display" id="t-evening">--:--:--</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 20:00</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="section-label" style="margin-bottom:8px;">DATO OG TID NU</div>
+        <div id="current-time" style="font-family:'DM Mono',monospace;font-size:18px;color:var(--accent);"></div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Alle tidspunkter er CET/CEST</div>
+      </div>
+    </div>
+
+    <!-- INDSTILLINGER -->
+    <div id="panel-settings" class="panel">
+      <div class="section-label">Konfiguration</div>
+      <div class="section-title">INDSTILLINGER</div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Gemini API Nøgle</div>
+        <div class="alert alert-info">Hent gratis nøgle på <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com/apikey</a> — kræver kun Google-konto</div>
+        <label>API KEY</label>
+        <div class="key-wrap" style="margin-bottom:10px;">
+          <input type="password" id="api-key" placeholder="AIzaSy...">
+          <button class="key-tog" onclick="togKey()">VIS</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">💾 Gem nøgle</button>
+          <span id="key-st" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);"></span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Manuel Prisindtastning</div>
+        <div class="alert alert-warn">Bruges kun hvis live-hentning fejler — indsæt fra Binance/CMC</div>
+        <div class="g3">
+          <div><label>BTC (USD)</label><input type="number" id="man-btc" placeholder="67500"></div>
+          <div><label>ETH (USD)</label><input type="number" id="man-eth" placeholder="3200"></div>
+          <div><label>SOL (USD)</label><input type="number" id="man-sol" placeholder="145"></div>
+        </div>
+        <div class="g3">
+          <div><label>BTC 24H %</label><input type="number" id="man-btc-c" placeholder="2.4"></div>
+          <div><label>ETH 24H %</label><input type="number" id="man-eth-c" placeholder="1.1"></div>
+          <div><label>FEAR & GREED</label><input type="number" id="man-fng" placeholder="65"></div>
+        </div>
+        <div class="g3">
+          <div><label>BOSON (USD)</label><input type="number" id="man-boson" placeholder="0.85"></div>
+          <div><label>ICP (USD)</label><input type="number" id="man-icp" placeholder="8.5"></div>
+          <div><label>DOT (USD)</label><input type="number" id="man-dot" placeholder="7.2"></div>
+        </div>
+        <label>TRENDING NARRATIV</label>
+        <input type="text" id="man-trend" placeholder="eks. AI tokens, RWA, BTC ETF flows" style="margin-bottom:10px;">
+        <button class="btn btn-primary btn-sm" onclick="saveManual()">💾 Brug disse priser</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────
+let prices = {};
+let analysisCache = '';
+let postHistory = JSON.parse(localStorage.getItem('post_history') || '[]');
+
+// ─── WEEKLY PLAN ─────────────────────────
+const WEEKLY_X = [
+  {day:'Søn',theme:'Uge-recap',desc:'Weekly summary and what to watch next week',type:'recap'},
+  {day:'Man',theme:'Makro-setup',desc:"This week's macro setup — key levels and catalysts",type:'macro'},
+  {day:'Tir',theme:'On-chain + Smart Money',desc:'On-chain data and smart money movements',type:'onchain'},
+  {day:'Ons',theme:'AI & Tech',desc:'AI and tech news linked to crypto infrastructure',type:'ai'},
+  {day:'Tor',theme:'Geopolitik + Energi',desc:'Geopolitics and energy markets impact on Bitcoin',type:'macro'},
+  {day:'Fre',theme:'Vinder & Taber',desc:"This week's biggest winner and loser — with data",type:'alpha'},
+  {day:'Lør',theme:'Dybdeanalyse',desc:'Deep dive into one specific asset or trend',type:'onchain'}
+];
+const WEEKLY_IG = [
+  {day:'Søn',theme:'Markedsanalyse',desc:'Weekly market analysis carousel',type:'alpha'},
+  {day:'Man',theme:'Quote Card',desc:'Inspiring trading/crypto quote',type:'educational'},
+  {day:'Tir',theme:'On-chain Signal',desc:'On-chain signal or token analysis carousel',type:'onchain'},
+  {day:'Ons',theme:'Interaktivt',desc:'Community engagement question',type:'educational'},
+  {day:'Tor',theme:'Fejl & Strategier',desc:'Top mistakes or strategies — educational carousel',type:'educational'},
+  {day:'Fre',theme:'Uge-recap',desc:'Weekly recap carousel',type:'recap'},
+  {day:'Lør',theme:'Educational',desc:'Crypto beginner — fundamental concept',type:'educational'}
+];
+
+// ─── NAVIGATION ──────────────────────────
+function nav(el, id, title) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('topbar-title').textContent = title.toUpperCase();
+  if (id === 'planner') renderPlanner();
+  if (id === 'today') setTodayTheme();
+  if (id === 'history') renderHistory();
+  if (id === 'timer') startTimers();
+}
+
+// ─── PRICE FETCH ─────────────────────────
+const TOKEN_IDS = 'bitcoin,ethereum,solana,boson-protocol,internet-computer,polkadot';
+const TOKEN_MAP = {
+  bitcoin: {sym:'BTC',color:'var(--green)'},
+  ethereum: {sym:'ETH',color:'var(--accent)'},
+  solana: {sym:'SOL',color:'var(--accent2)'},
+  'boson-protocol': {sym:'BOSON',color:'var(--warn)'},
+  'internet-computer': {sym:'ICP',color:'#ff6b9d'},
+  polkadot: {sym:'DOT',color:'#e6007a'}
+};
+
+async function fetchPrices() {
+  setAlert('info', '⏳ Henter live priser fra CoinGecko...');
+  document.getElementById('live-status').textContent = 'OPDATERER...';
+  try {
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${TOKEN_IDS}&vs_currencies=usd&include_24hr_change=true`;
+    let cg;
+    try {
+      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+      if (!r.ok) throw new Error();
+      cg = await r.json();
+    } catch {
+      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      const r2 = await fetch(proxy, {signal: AbortSignal.timeout(10000)});
+      cg = await r2.json();
+    }
+
+    // FNG
+    let fng = null, fngLabel = null;
+    try {
+      const fr = await fetch('https://api.alternative.me/fng/?limit=1', {signal: AbortSignal.timeout(6000)});
+      if (fr.ok) { const fd = await fr.json(); fng = fd.data?.[0]?.value; fngLabel = fd.data?.[0]?.value_classification; }
+    } catch {}
+
+    prices = {
+      btc: cg.bitcoin?.usd, btcC: cg.bitcoin?.usd_24h_change?.toFixed(2),
+      eth: cg.ethereum?.usd, ethC: cg.ethereum?.usd_24h_change?.toFixed(2),
+      sol: cg.solana?.usd, solC: cg.solana?.usd_24h_change?.toFixed(2),
+      boson: cg['boson-protocol']?.usd, bosonC: cg['boson-protocol']?.usd_24h_change?.toFixed(2),
+      icp: cg['internet-computer']?.usd, icpC: cg['internet-computer']?.usd_24h_change?.toFixed(2),
+      dot: cg.polkadot?.usd, dotC: cg.polkadot?.usd_24h_change?.toFixed(2),
+      fng, fngLabel
+    };
+    updateUI();
+    setAlert('ok', '✅ Live priser opdateret — ' + new Date().toLocaleTimeString('da-DK'));
+    document.getElementById('live-status').textContent = 'LIVE';
+  } catch(e) {
+    setAlert('warn', '⚠️ Live-hentning fejlede — brug manuel prisindtastning under Indstillinger.');
+    document.getElementById('live-status').textContent = 'OFFLINE';
+    const saved = localStorage.getItem('manual_prices');
+    if (saved) { prices = JSON.parse(saved); updateUI(); }
+  }
+}
+
+function setAlert(type, msg) {
+  const el = document.getElementById('price-alert');
+  el.className = 'alert alert-' + type;
+  el.textContent = msg;
+}
+
+function fp(n, dec=0) { return n ? '$' + parseFloat(n).toLocaleString('en-US', {maximumFractionDigits:dec, minimumFractionDigits:dec}) : '$—'; }
+function fc(c) { if (!c) return ''; const n = parseFloat(c); return (n >= 0 ? '▲ +' : '▼ ') + Math.abs(n).toFixed(2) + '%'; }
+function fgLabel(v) {
+  v = parseInt(v||50);
+  if (v >= 75) return 'Extreme Greed';
+  if (v >= 55) return 'Greed';
+  if (v >= 45) return 'Neutral';
+  if (v >= 25) return 'Fear';
+  return 'Extreme Fear';
+}
+
+function updateUI() {
+  // Topbar price strip
+  const tokens = [
+    {sym:'BTC', val:prices.btc, chg:prices.btcC},
+    {sym:'ETH', val:prices.eth, chg:prices.ethC},
+    {sym:'SOL', val:prices.sol, chg:prices.solC},
+    {sym:'ICP', val:prices.icp, chg:prices.icpC},
+    {sym:'DOT', val:prices.dot, chg:prices.dotC},
+  ];
+  document.getElementById('price-strip').innerHTML = tokens.map(t =>
+    `<div class="pp"><span class="sym">${t.sym}</span><span class="val">${fp(t.val)}</span><span class="chg ${parseFloat(t.chg||0)>=0?'up':'dn'}">${fc(t.chg)}</span></div>`
+  ).join('');
+
+  // Metrics grid
+  const all = [
+    {label:'BTC',val:prices.btc,chg:prices.btcC,color:'var(--green)'},
+    {label:'ETH',val:prices.eth,chg:prices.ethC,color:'var(--accent)'},
+    {label:'SOL',val:prices.sol,chg:prices.solC,color:'var(--accent2)'},
+    {label:'BOSON',val:prices.boson,chg:prices.bosonC,color:'var(--warn)',dec:4},
+    {label:'ICP',val:prices.icp,chg:prices.icpC,color:'#ff6b9d',dec:2},
+    {label:'DOT',val:prices.dot,chg:prices.dotC,color:'#e6007a',dec:2},
+  ];
+  document.getElementById('metrics-row').innerHTML = all.map(t =>
+    `<div class="metric"><div class="metric-label">${t.label}</div><div class="metric-val" style="color:${t.color}">${fp(t.val, t.dec||0)}</div><div class="metric-sub ${parseFloat(t.chg||0)>=0?'up':'dn'}">${fc(t.chg)}</div></div>`
+  ).join('') + `<div class="metric"><div class="metric-label">FEAR & GREED</div><div class="metric-val" style="color:var(--warn)">${prices.fng||'—'}</div><div class="metric-sub">${prices.fngLabel || fgLabel(prices.fng)}</div></div>`;
+
+  // Signals
+  const btcC = parseFloat(prices.btcC||0);
+  const fng = parseInt(prices.fng||50);
+  const sigs = [
+    {t:btcC>1?'bull':btcC<-1?'bear':'neut',txt:`BTC ${btcC>=0?'+':''}${btcC}% — ${btcC>1?'Bullish momentum':btcC<-1?'Bearish':'Neutral'}`},
+    {t:fng>60?'bull':fng<40?'bear':'neut',txt:`Fear & Greed: ${prices.fng||'?'}/100 — ${fgLabel(fng)}`},
+    {t:'neut',txt:`ICP: ${fp(prices.icp,2)} | DOT: ${fp(prices.dot,2)} | BOSON: ${fp(prices.boson,4)}`},
+    {t:'neut',txt:`ETH: ${fp(prices.eth)} | SOL: ${fp(prices.sol)}`},
+  ];
+  document.getElementById('signals-list').innerHTML = sigs.map(s =>
+    `<div class="sig-row"><div class="sig-dot ${s.t}"></div><span>${s.txt}</span></div>`
+  ).join('');
+}
+
+// ─── AI ──────────────────────────────────
+async function callGemini(prompt) {
+  const k = localStorage.getItem('gemini_key');
+  if (!k) return null;
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.75,maxOutputTokens:2000}})
+    });
+    const d = await r.json();
+    return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch { return null; }
+}
+
+async function runAnalysis() {
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('analyze-ld').style.display = 'flex';
+  const k = localStorage.getItem('gemini_key');
+  let text = '';
+  if (k && prices.btc) {
+    const p = `You are a professional crypto market analyst for NeuralAlpha. Write a 3-sentence professional market assessment in DANISH based on:
+BTC: ${fp(prices.btc)} (${prices.btcC}% 24h), ETH: ${fp(prices.eth)}, SOL: ${fp(prices.sol)}
+ICP: ${fp(prices.icp,2)}, DOT: ${fp(prices.dot,2)}, BOSON: ${fp(prices.boson,4)}
+Fear & Greed: ${prices.fng}/100 (${fgLabel(prices.fng)})
+Be analytical, direct, no hype. End with a content strategy recommendation for NeuralAlpha.`;
+    const res = await callGemini(p);
+    if (res) text = res;
+  }
+  if (!text) {
+    const btcC = parseFloat(prices.btcC||0);
+    text = `Markedet viser ${btcC>1?'bullish':btcC<-1?'bearish':'neutralt'} momentum. BTC på ${fp(prices.btc)} med Fear & Greed ${prices.fng||'?'}/100 (${fgLabel(prices.fng)}). ${btcC>2?'Stærkt engagement-vindue — del alpha nu.':btcC<-2?'Educational content performer bedst nu.':'Analytisk indhold er optimalt i sideways-marked.'}`;
+  }
+  analysisCache = text;
+  document.getElementById('ai-assess').textContent = text;
+  document.getElementById('ai-assess').style.color = 'var(--text)';
+  document.getElementById('analyze-btn').disabled = false;
+  document.getElementById('analyze-ld').style.display = 'none';
+}
+
+// ─── TODAY ───────────────────────────────
+function getTodayIdx() { return new Date().getDay(); }
+function setTodayTheme() {
+  const i = getTodayIdx();
+  document.getElementById('today-theme').textContent = `𝕏 ${WEEKLY_X[i].theme}  |  📸 ${WEEKLY_IG[i].theme}`;
+  document.getElementById('today-desc').innerHTML = `<b>X (3 posts):</b> ${WEEKLY_X[i].desc}<br><b>Instagram:</b> ${WEEKLY_IG[i].desc}`;
+}
+
+// ─── GENERATE POSTS ──────────────────────
+async function generatePosts() {
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('gen-ld').style.display = 'flex';
+  document.getElementById('posts-out').style.display = 'none';
+
+  const i = getTodayIdx();
+  const xPlan = WEEKLY_X[i];
+  const igPlan = WEEKLY_IG[i];
+  const extra = document.getElementById('extra-ctx').value;
+  const typeOv = document.getElementById('post-type').value;
+  const k = localStorage.getItem('gemini_key');
+
+  let x1='',x2='',x3='',ig='';
+  const btcC = parseFloat(prices.btcC||0);
+  const fng = parseInt(prices.fng||50);
+
+  if (k && prices.btc) {
+    const prompt = `You are the social media manager for NeuralAlpha — a crypto intelligence brand.
+Brand promise: "Crypto alpha before it happens. AI-driven on-chain signals. Funding flows & market intelligence."
+Tagline: "We see what isn't said."
+
+Live market data:
+BTC: ${fp(prices.btc)} (${prices.btcC}% 24h)
+ETH: ${fp(prices.eth)} (${prices.ethC}% 24h)
+SOL: ${fp(prices.sol)} (${prices.solC}% 24h)
+ICP: ${fp(prices.icp,2)} | DOT: ${fp(prices.dot,2)} | BOSON: ${fp(prices.boson,4)}
+Fear & Greed: ${prices.fng||50}/100 (${fgLabel(fng)})
+Trending: ${prices.trending||'N/A'}
+Market assessment: ${analysisCache||'N/A'}
+
+Today's X theme: ${xPlan.theme} — ${xPlan.desc}
+Today's Instagram theme: ${igPlan.theme} — ${igPlan.desc}
+${extra?'Extra context: '+extra:''}
+
+ALL POSTS MUST BE IN ENGLISH.
+
+X_MORNING:
+[Max 280 chars. Morning market opening. Professional, direct. Max 3 hashtags. End with: Neural Alpha — We see what isn't said.]
+
+X_AFTERNOON:
+[Max 280 chars. Afternoon on-chain or breaking development. Max 3 hashtags.]
+
+X_EVENING:
+[Max 280 chars. Deep insight nobody else says. Max 3 hashtags. End with: Not financial advice. Pattern recognition only.]
+
+IG_CAPTION:
+[150-200 words. Storytelling, educational. Strong CTA. 10 niche hashtags on new line.]`;
+
+    const res = await callGemini(prompt);
+    if (res) {
+      x1 = res.match(/X_MORNING:\s*([\s\S]*?)(?=X_AFTERNOON:|$)/i)?.[1]?.trim() || '';
+      x2 = res.match(/X_AFTERNOON:\s*([\s\S]*?)(?=X_EVENING:|$)/i)?.[1]?.trim() || '';
+      x3 = res.match(/X_EVENING:\s*([\s\S]*?)(?=IG_CAPTION:|$)/i)?.[1]?.trim() || '';
+      ig = res.match(/IG_CAPTION:\s*([\s\S]*?)$/i)?.[1]?.trim() || '';
+    }
+  }
+
+  // Fallback
+  if (!x1) x1 = `Bitcoin is holding at ${fp(prices.btc)} this morning.\n\nFear & Greed: ${prices.fng||'?'}/100 — ${fgLabel(fng)}.\n\n${btcC>1?'On-chain data shows whale accumulation continuing. The signal is in the data, not the headlines.':'Long-term holders are reducing sell pressure. Watch key levels closely.'}\n\nNeural Alpha — We see what isn't said.\n\n#Bitcoin #OnChain #NeuralAlpha`;
+  if (!x2) x2 = `${xPlan.theme.toUpperCase()} — ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}\n\nETH: ${fp(prices.eth)} | SOL: ${fp(prices.sol)} | ICP: ${fp(prices.icp,2)}\n\n${prices.trending?`Trending narratives: ${prices.trending}.`:'Monitoring funding rates and exchange flows closely.'}\n\nThe signal is in the data, not the headlines.\n\n#CryptoAlpha #NeuralAlpha #OnChain`;
+  if (!x3) x3 = `Nobody is talking about this.\n\nWhen Fear & Greed reads ${prices.fng||'?'}, the pattern historically points to one direction — and it's not the one retail expects.\n\nSmart money is positioning quietly.\n\nWe track what they do, not what they say.\n\nNeural Alpha — We see what isn't said.\nNot financial advice. Pattern recognition only.\n\n#Bitcoin #SmartMoney #NeuralAlpha`;
+  if (!ig) ig = `📡 ${igPlan.theme.toUpperCase()}\n\nBTC is trading at ${fp(prices.btc)} with ${btcC>=0?'+':''}${btcC}% in the last 24 hours.\n\nFear & Greed Index: ${prices.fng||'?'}/100 — ${fgLabel(fng)} territory.\n\n${analysisCache||'On-chain signals are sending important data. The market rarely tells you the full story through price alone.'}\n\nWhat is your read on the market right now? Drop it in the comments 👇\n\n#CryptoAlpha #Bitcoin #OnChainAnalysis #NeuralAlpha #CryptoIntelligence #BTCAnalysis #CryptoSignals #MarketUpdate #SmartMoney #Web3`;
+
+  document.getElementById('x1').textContent = x1;
+  document.getElementById('x2').textContent = x2;
+  document.getElementById('x3').textContent = x3;
+  document.getElementById('ig1').textContent = ig;
+
+  // Hide old arabic translations
+  ['ar1','ar2','ar3','ar-ig'].forEach(id => { const el=document.getElementById(id); el.style.display='none'; el.textContent=''; });
+
+  // Hashtags
+  renderHashtags(xPlan.type, igPlan.type);
+
+  document.getElementById('posts-out').style.display = 'block';
+  document.getElementById('gen-btn').disabled = false;
+  document.getElementById('gen-ld').style.display = 'none';
+}
+
+// ─── HASHTAG OPTIMIZER ───────────────────
+function renderHashtags(xType, igType) {
+  const base = ['#NeuralAlpha','#Bitcoin','#BTC','#Crypto','#OnChain','#CryptoAlpha','#SmartMoney','#Web3','#CryptoIntel'];
+  const typeMap = {
+    onchain: ['#OnChainAnalysis','#WhaleAlert','#GlassNode','#CryptoSignals','#ChainAnalysis'],
+    macro: ['#MacroCrypto','#BitcoinMacro','#GlobalMarkets','#Inflation','#DollarIndex'],
+    ai: ['#AICrypto','#DeAI','#AIAgents','#Bittensor','#CryptoInfrastructure'],
+    alpha: ['#AlphaSignal','#CryptoAlpha','#TradingSignals','#AltSeason','#CryptoTrading'],
+    educational: ['#CryptoEducation','#LearnCrypto','#CryptoBeginner','#BlockchainBasics','#CryptoTips'],
+    recap: ['#CryptoWeekly','#MarketUpdate','#WeeklyRecap','#CryptoNews','#MarketSummary'],
+  };
+  const extra = typeMap[xType] || typeMap[igType] || [];
+  const all = [...new Set([...base, ...extra])].slice(0, 18);
+  document.getElementById('hashtags').innerHTML = all.map(h =>
+    `<span class="htag" onclick="cpText('${h}')" title="Klik for at kopiere">${h}</span>`
+  ).join('');
+}
+
+function cpText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const tmp = event.target;
+    const orig = tmp.textContent;
+    tmp.textContent = '✓';
+    tmp.style.background = 'rgba(0,255,136,.15)';
+    setTimeout(() => { tmp.textContent = orig; tmp.style.background = ''; }, 1000);
+  });
+}
+
+// ─── IMAGE GENERATION ────────────────────
+async function genImage(postId, theme) {
+  const key = localStorage.getItem('gemini_key');
+  const phId = 'img-' + postId;
+  const imgId = 'imgprev-' + postId;
+  const ph = document.getElementById(phId);
+  const img = document.getElementById(imgId);
+
+  ph.style.display = 'block';
+  ph.textContent = '⏳ Genererer billede...';
+  img.style.display = 'none';
+
+  if (!key) {
+    ph.textContent = '⚠️ Gemini API-nøgle mangler — tilføj den under Indstillinger for at generere billeder.';
+    return;
+  }
+
+  // Imagen via Gemini API
+  try {
+    const postText = document.getElementById(postId).textContent.substring(0, 200);
+    const prompt = `Create a professional, dark-themed crypto/finance social media image for NeuralAlpha brand.
+Style: Dark background (#06080d), cyan (#00e5ff) and purple accents, futuristic data visualization aesthetic.
+Theme: ${theme}
+Context: ${postText}
+The image should feel like a Bloomberg terminal meets cyberpunk. No text in the image. Focus on abstract data, charts, network nodes, or financial visuals.`;
+
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${key}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        instances: [{prompt}],
+        parameters: {sampleCount: 1, aspectRatio: '1:1'}
+      })
+    });
+    const d = await r.json();
+    const b64 = d.predictions?.[0]?.bytesBase64Encoded;
+    if (b64) {
+      img.src = 'data:image/png;base64,' + b64;
+      img.style.display = 'block';
+      ph.style.display = 'none';
+    } else {
+      throw new Error('Ingen billeddata returneret');
+    }
+  } catch(e) {
+    ph.textContent = '⚠️ Billedgenerering kræver Imagen API adgang. Alternativt: brug Canva eller Midjourney med prompt: "Dark crypto finance dashboard, cyan and purple accents, futuristic data visualization, NeuralAlpha brand, ' + theme + '"';
+  }
+}
+
+// ─── TRANSLATE TO ARABIC ─────────────────
+async function translatePost(srcId, destId) {
+  const src = document.getElementById(srcId).textContent;
+  const dest = document.getElementById(destId);
+  if (!src.trim()) return;
+
+  dest.style.display = 'block';
+  dest.textContent = '⏳ Oversætter til arabisk...';
+
+  const key = localStorage.getItem('gemini_key');
+  if (key) {
+    const prompt = `Translate the following social media post to Arabic. Keep all hashtags in English. Maintain the professional tone. Keep emojis. Only output the translated text, nothing else.\n\n${src}`;
+    const res = await callGemini(prompt);
+    if (res) { dest.textContent = res; return; }
+  }
+
+  // Fallback: Google Translate link
+  dest.innerHTML = `<span style="color:var(--warn)">⚠️ Tilføj Gemini API-nøgle for automatisk oversættelse.</span><br><br><a href="https://translate.google.com/?sl=en&tl=ar&text=${encodeURIComponent(src)}" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;">🔗 Åbn i Google Translate →</a>`;
+}
+
+// ─── COPY ────────────────────────────────
+function cp(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    const btns = document.querySelectorAll('.copy-btn');
+    btns.forEach(b => { if (b.getAttribute('onclick') === `cp('${id}')`) { b.textContent = 'KOPIERET!'; setTimeout(() => b.textContent = 'COPY', 1500); }});
+  });
+}
+
+// ─── HISTORY ─────────────────────────────
+function savePosts() {
+  const entry = {
+    date: new Date().toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+    x1: document.getElementById('x1').textContent,
+    x2: document.getElementById('x2').textContent,
+    x3: document.getElementById('x3').textContent,
+    ig: document.getElementById('ig1').textContent,
+    btc: fp(prices.btc)
+  };
+  postHistory.unshift(entry);
+  if (postHistory.length > 30) postHistory.pop();
+  localStorage.setItem('post_history', JSON.stringify(postHistory));
+  alert('✅ Posts gemt til historik!');
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if (!postHistory.length) { el.innerHTML = '<div style="color:var(--muted2);font-family:\'DM Mono\',monospace;font-size:12px;">Ingen gemte posts endnu.</div>'; return; }
+  el.innerHTML = postHistory.map((e, i) => `
+    <div class="history-item" onclick="expandHistory(${i})">
+      <div class="history-meta">${e.date} — BTC: ${e.btc}</div>
+      <div class="history-preview">${e.x1.substring(0,80)}...</div>
+    </div>
+  `).join('');
+}
+
+function expandHistory(i) {
+  const e = postHistory[i];
+  const w = window.open('', '_blank', 'width=700,height=600');
+  w.document.write(`<html><body style="background:#0f1420;color:#dce6f5;font-family:monospace;padding:20px;white-space:pre-wrap;">
+<h3 style="color:#00e5ff">${e.date} — BTC: ${e.btc}</h3>
+<h4>𝕏 MORGEN:</h4><p>${e.x1}</p>
+<h4>𝕏 EFTERMIDDAG:</h4><p>${e.x2}</p>
+<h4>𝕏 AFTEN:</h4><p>${e.x3}</p>
+<h4>📸 INSTAGRAM:</h4><p>${e.ig}</p>
+</body></html>`);
+}
+
+function clearHistory() {
+  if (!confirm('Ryd al post-historik?')) return;
+  postHistory = [];
+  localStorage.removeItem('post_history');
+  renderHistory();
+}
+
+// ─── TIMERS ──────────────────────────────
+function startTimers() {
+  updateTimers();
+  setInterval(updateTimers, 1000);
+}
+
+function updateTimers() {
+  const now = new Date();
+  document.getElementById('current-time').textContent = now.toLocaleString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  [['t-morning',8],['t-afternoon',14],['t-evening',20]].forEach(([id,h]) => {
+    const target = new Date();
+    target.setHours(h,0,0,0);
+    if (now > target) target.setDate(target.getDate()+1);
+    const diff = target - now;
+    const hh = Math.floor(diff/3600000);
+    const mm = Math.floor((diff%3600000)/60000);
+    const ss = Math.floor((diff%60000)/1000);
+    const el = document.getElementById(id);
+    if (el) el.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+  });
+}
+
+// ─── PLANNER ─────────────────────────────
+function renderPlanner() {
+  const todayIdx = getTodayIdx();
+  const dayNames = ['SØN','MAN','TIR','ONS','TOR','FRE','LØR'];
+  document.getElementById('week-grid').innerHTML = WEEKLY_X.map((x,i) => `
+    <div class="day-col ${i===todayIdx?'today':''}">
+      <div class="day-name">${dayNames[i]}${i===todayIdx?' ●':''}</div>
+      <span class="day-tag tag-x">𝕏 ${x.theme}</span>
+      <span class="day-tag tag-ig">📸 ${WEEKLY_IG[i].theme}</span>
+    </div>`).join('');
+  document.getElementById('week-detail').innerHTML = WEEKLY_X.map((x,i) => `
+    <div class="sig-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px;${i===todayIdx?'border-color:rgba(0,229,255,.3);':''}">
+      <div style="font-weight:700;font-size:13px;">${dayNames[i]}${i===todayIdx?' <span class="tag tag-bull">I DAG</span>':''}</div>
+      <div style="font-size:12px;">𝕏 <b>${x.theme}</b> — <span style="color:var(--muted2)">${x.desc}</span></div>
+      <div style="font-size:12px;">📸 <b style="color:#e1306c">${WEEKLY_IG[i].theme}</b> — <span style="color:var(--muted2)">${WEEKLY_IG[i].desc}</span></div>
+    </div>`).join('');
+}
+
+// ─── SETTINGS ────────────────────────────
+function togKey() { const i=document.getElementById('api-key'); i.type=i.type==='password'?'text':'password'; event.target.textContent=i.type==='password'?'VIS':'SKJUL'; }
+function saveKey() {
+  const k=document.getElementById('api-key').value.trim();
+  if(!k) return;
+  localStorage.setItem('gemini_key',k);
+  document.getElementById('key-st').textContent='✓ GEMT';
+  document.getElementById('key-st').style.color='var(--green)';
+}
+function saveManual() {
+  prices = {
+    btc:document.getElementById('man-btc').value, btcC:document.getElementById('man-btc-c').value,
+    eth:document.getElementById('man-eth').value, ethC:document.getElementById('man-eth-c').value,
+    sol:document.getElementById('man-sol').value,
+    boson:document.getElementById('man-boson').value,
+    icp:document.getElementById('man-icp').value,
+    dot:document.getElementById('man-dot').value,
+    fng:document.getElementById('man-fng').value,
+    fngLabel:fgLabel(document.getElementById('man-fng').value),
+    trending:document.getElementById('man-trend').value
+  };
+  localStorage.setItem('manual_prices',JSON.stringify(prices));
+  updateUI();
+  setAlert('ok','✅ Manuelle priser gemt og opdateret.');
+  document.getElementById('live-status').textContent='MANUELT';
+  alert('✅ Priser gemt!');
+}
+
+// ─── INIT ────────────────────────────────
+window.addEventListener('load', () => {
+  const k=localStorage.getItem('gemini_key');
+  if(k){ document.getElementById('api-key').value=k; document.getElementById('key-st').textContent='✓ NØGLE INDLÆST'; document.getElementById('key-st').style.color='var(--green)'; }
+  setTodayTheme();
+  renderPlanner();
+  fetchPrices();
+  setInterval(fetchPrices, 5*60*1000);
+  startTimers();
+});
+</script>
+</body>
+</html>
