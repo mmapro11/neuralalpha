@@ -3,359 +3,406 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NeuralAlpha — Content Intelligence v3</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>NeuralAlpha</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=Barlow:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#06080d;--surface:#0b0f18;--card:#0f1420;--border:#181f2e;--border2:#1e2840;
-  --accent:#00e5ff;--accent2:#7b61ff;--green:#00ff88;--red:#ff3d5a;--warn:#ffb700;
-  --text:#dce6f5;--muted:#3d4f6e;--muted2:#5a6e8a;
+  --bg:#06080d; --surface:#0b0f18; --card:#0f1420; --border:#181f2e;
+  --accent:#00e5ff; --accent2:#7b61ff; --green:#00ff88; --red:#ff3d5a;
+  --warn:#ffb700; --text:#dce6f5; --muted:#3d4f6e; --muted2:#5a6e8a;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,0.01) 2px,rgba(0,229,255,0.01) 4px);pointer-events:none;z-index:9999;}
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 15% 10%,rgba(0,229,255,0.05) 0%,transparent 45%),radial-gradient(ellipse at 85% 90%,rgba(123,97,255,0.05) 0%,transparent 45%);pointer-events:none;z-index:0;}
-.shell{display:flex;min-height:100vh;position:relative;z-index:1;}
-.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
-.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:20px;}
-.logo-mark{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;line-height:1;}
-.logo-mark span{color:var(--accent);}
-.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;margin-top:3px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted2);transition:all .15s;border-left:2px solid transparent;letter-spacing:.3px;}
-.nav-item:hover{color:var(--text);background:rgba(0,229,255,0.03);}
-.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,229,255,0.05);}
-.nav-icon{font-size:15px;width:18px;text-align:center;}
-.sidebar-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
-.live-dot{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);}
-.live-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.main{flex:1;overflow-y:auto;}
-.topbar{padding:14px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(11,15,24,0.9);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;}
-.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;}
-.price-strip{display:flex;gap:8px;flex-wrap:wrap;}
-.pp{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;background:var(--card);border:1px solid var(--border2);}
-.pp .sym{color:var(--muted2);margin-right:3px;}
-.pp .val{color:var(--text);}
-.pp .chg{margin-left:4px;}
-.up{color:var(--green);}.dn{color:var(--red);}
-.content{padding:24px;}
-.panel{display:none;}.panel.active{display:block;}
-.section-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:5px;}
-.section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:18px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;position:relative;overflow:hidden;}
-.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.12),transparent);}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.g6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
-.metric{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;}
-.metric-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
-.metric-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
-.metric-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;}
-.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Barlow',sans-serif;letter-spacing:.8px;text-transform:uppercase;transition:all .18s;}
-.btn-primary{background:var(--accent);color:#000;}
-.btn-primary:hover{box-shadow:0 0 18px rgba(0,229,255,.35);transform:translateY(-1px);}
-.btn-primary:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
-.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
-.btn-ghost:hover{color:var(--text);border-color:var(--muted2);}
-.btn-ar{background:rgba(255,183,0,.1);border:1px solid rgba(255,183,0,.3);color:var(--warn);font-size:11px;padding:6px 12px;}
-.btn-ar:hover{background:rgba(255,183,0,.18);}
-.btn-img{background:rgba(123,97,255,.1);border:1px solid rgba(123,97,255,.3);color:var(--accent2);}
-.btn-img:hover{background:rgba(123,97,255,.2);}
-.btn-sm{padding:6px 12px;font-size:11px;}
-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:1px;display:block;margin-bottom:4px;}
-input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:11px;outline:none;transition:border-color .15s;}
-input:focus,textarea:focus,select:focus{border-color:rgba(0,229,255,.35);}
-textarea{min-height:70px;resize:vertical;}
-select option{background:var(--surface);}
-.sig-row{display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:5px;font-size:13px;}
-.sig-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.sig-dot.bull{background:var(--green);box-shadow:0 0 6px var(--green);}
-.sig-dot.bear{background:var(--red);box-shadow:0 0 6px var(--red);}
-.sig-dot.neut{background:var(--accent);box-shadow:0 0 6px var(--accent);}
-.post-wrap{margin-bottom:18px;}
-.post-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;flex-wrap:wrap;gap:6px;}
-.post-platform{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:500;}
-.platform-x{color:var(--text);}.platform-ig{color:#e1306c;}.platform-ar{color:var(--warn);}
-.post-actions{display:flex;gap:6px;align-items:center;}
-.post-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;min-height:80px;}
-.post-box.arabic{direction:rtl;text-align:right;font-size:13px;line-height:2;}
-.copy-btn{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);color:var(--accent);cursor:pointer;letter-spacing:1px;transition:all .15s;}
-.copy-btn:hover{background:rgba(0,229,255,.12);}
-.img-preview{width:100%;border-radius:8px;margin-top:10px;border:1px solid var(--border);display:none;}
-.img-placeholder{background:var(--surface);border:1px dashed var(--border2);border-radius:8px;padding:20px;text-align:center;color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px;margin-top:10px;display:none;}
-.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
-.day-col{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 8px;min-height:110px;}
-.day-col.today{border-color:rgba(0,229,255,.4);background:rgba(0,229,255,.03);}
-.day-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted2);margin-bottom:7px;text-align:center;}
-.day-col.today .day-name{color:var(--accent);}
-.day-tag{display:block;font-size:10px;padding:3px 5px;border-radius:4px;margin-bottom:3px;line-height:1.4;font-weight:600;}
-.tag-x{background:rgba(220,230,245,.06);color:var(--text);}
-.tag-ig{background:rgba(225,48,108,.08);color:#e1306c;}
-.ld{display:inline-flex;gap:4px;align-items:center;}
-.ld span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:ld .6s infinite alternate;}
-.ld span:nth-child(2){animation-delay:.15s}.ld span:nth-child(3){animation-delay:.3s}
-@keyframes ld{from{opacity:.2;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
-.div{border:none;border-top:1px solid var(--border);margin:20px 0;}
-.alert{padding:9px 13px;border-radius:6px;font-size:11px;margin-bottom:14px;border-left:2px solid;font-family:'DM Mono',monospace;line-height:1.6;}
-.alert-info{background:rgba(0,229,255,.04);border-color:var(--accent);color:var(--muted2);}
-.alert-warn{background:rgba(255,183,0,.04);border-color:var(--warn);color:var(--warn);}
-.alert-ok{background:rgba(0,255,136,.04);border-color:var(--green);color:var(--green);}
-.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;border-radius:4px;letter-spacing:1px;}
-.tag-bull{background:rgba(0,255,136,.08);color:var(--green);border:1px solid rgba(0,255,136,.2);}
-.tag-bear{background:rgba(255,61,90,.08);color:var(--red);border:1px solid rgba(255,61,90,.2);}
-.hashtag-box{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.htag{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.15);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;padding:3px 9px;border-radius:4px;cursor:pointer;transition:all .15s;}
-.htag:hover{background:rgba(0,229,255,.15);}
-.history-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
-.history-item:hover{border-color:rgba(0,229,255,.3);}
-.history-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:5px;}
-.history-preview{font-size:12px;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.timer-display{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:var(--accent);letter-spacing:3px;}
-.key-wrap{position:relative;}
-.key-wrap input{padding-right:70px;margin-bottom:0;}
-.key-tog{position:absolute;right:10px;top:9px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);cursor:pointer;background:none;border:none;letter-spacing:1px;}
-@media(max-width:900px){.sidebar{display:none;}.g2,.g3,.g4,.g6{grid-template-columns:1fr;}.week-grid{grid-template-columns:repeat(3,1fr);}.price-strip{display:none;}}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; min-height:100vh; }
+.shell { display:flex; min-height:100vh; }
+/* SIDEBAR */
+.sidebar { width:220px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:24px 0; position:sticky; top:0; height:100vh; flex-shrink:0; }
+.logo { padding:0 20px 24px; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.logo-mark { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:3px; }
+.logo-mark span { color:var(--accent); }
+.logo-sub { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted2); letter-spacing:2px; margin-top:3px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:10px 20px; cursor:pointer; font-size:13px; font-weight:600; color:var(--muted2); transition:all .15s; border-left:2px solid transparent; }
+.nav-item:hover { color:var(--text); background:rgba(0,229,255,0.03); }
+.nav-item.active { color:var(--accent); border-left-color:var(--accent); background:rgba(0,229,255,0.05); }
+.sidebar-bottom { margin-top:auto; padding:16px 20px; border-top:1px solid var(--border); }
+.live-dot { display:flex; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:10px; color:var(--green); }
+.live-dot::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+/* MAIN */
+.main { flex:1; overflow-y:auto; }
+.topbar { padding:14px 24px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:rgba(11,15,24,0.9); position:sticky; top:0; z-index:100; }
+.topbar-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; }
+.price-strip { display:flex; gap:8px; flex-wrap:wrap; }
+.pp { font-family:'DM Mono',monospace; font-size:10px; padding:4px 10px; border-radius:4px; background:var(--card); border:1px solid var(--border); }
+.pp .sym { color:var(--muted2); margin-right:3px; }
+.up { color:var(--green); } .dn { color:var(--red); }
+.content { padding:24px; }
+/* PANELS */
+.panel { display:none; } .panel.active { display:block; }
+/* TYPOGRAPHY */
+.sec-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:2px; margin-bottom:5px; }
+.sec-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; margin-bottom:18px; }
+/* CARDS */
+.card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:14px; }
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px; }
+.g6 { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:18px; }
+/* METRIC */
+.metric { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; }
+.metric-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:2px; margin-bottom:5px; }
+.metric-val { font-family:'DM Mono',monospace; font-size:18px; font-weight:500; }
+.metric-sub { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); margin-top:2px; }
+/* BUTTONS */
+.btn { display:inline-flex; align-items:center; gap:7px; padding:9px 18px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; border:none; font-family:'Barlow',sans-serif; letter-spacing:.8px; text-transform:uppercase; transition:all .18s; }
+.btn-primary { background:var(--accent); color:#000; }
+.btn-primary:hover { box-shadow:0 0 18px rgba(0,229,255,.35); transform:translateY(-1px); }
+.btn-primary:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted2); }
+.btn-ghost:hover { color:var(--text); }
+.btn-ar { background:rgba(255,183,0,.1); border:1px solid rgba(255,183,0,.3); color:var(--warn); }
+.btn-img { background:rgba(123,97,255,.1); border:1px solid rgba(123,97,255,.3); color:var(--accent2); }
+.btn-sm { padding:6px 12px; font-size:11px; }
+/* FORM */
+label { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); letter-spacing:1px; display:block; margin-bottom:4px; }
+input, textarea, select { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 11px; color:var(--text); font-family:'DM Mono',monospace; font-size:12px; margin-bottom:11px; outline:none; }
+input:focus, textarea:focus, select:focus { border-color:rgba(0,229,255,.35); }
+textarea { min-height:70px; resize:vertical; }
+select option { background:var(--surface); }
+/* SIGNALS */
+.sig-row { display:flex; align-items:center; gap:9px; padding:8px 12px; background:var(--surface); border:1px solid var(--border); border-radius:6px; margin-bottom:5px; font-size:13px; }
+.sig-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.sig-dot.bull { background:var(--green); box-shadow:0 0 6px var(--green); }
+.sig-dot.bear { background:var(--red); box-shadow:0 0 6px var(--red); }
+.sig-dot.neut { background:var(--accent); box-shadow:0 0 6px var(--accent); }
+/* POSTS */
+.post-wrap { margin-bottom:18px; }
+.post-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; flex-wrap:wrap; gap:6px; }
+.post-platform { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; }
+.plat-x { color:var(--text); } .plat-ig { color:#e1306c; }
+.post-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.post-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px; font-family:'DM Mono',monospace; font-size:12px; line-height:1.8; white-space:pre-wrap; min-height:80px; }
+.post-box.arabic { direction:rtl; text-align:right; font-size:13px; line-height:2; }
+.copy-btn { font-family:'DM Mono',monospace; font-size:10px; padding:4px 10px; border-radius:4px; background:rgba(0,229,255,.06); border:1px solid rgba(0,229,255,.2); color:var(--accent); cursor:pointer; }
+.copy-btn:hover { background:rgba(0,229,255,.12); }
+/* PLANNER */
+.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:20px; }
+.day-col { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 8px; min-height:100px; }
+.day-col.today { border-color:rgba(0,229,255,.4); }
+.day-name { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--muted2); margin-bottom:7px; text-align:center; }
+.day-col.today .day-name { color:var(--accent); }
+.day-tag { display:block; font-size:9px; padding:3px 4px; border-radius:4px; margin-bottom:3px; font-weight:600; }
+.tag-x { background:rgba(220,230,245,.06); color:var(--text); }
+.tag-ig { background:rgba(225,48,108,.08); color:#e1306c; }
+/* HASHTAGS */
+.hashtag-box { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.htag { background:rgba(0,229,255,.07); border:1px solid rgba(0,229,255,.15); color:var(--accent); font-family:'DM Mono',monospace; font-size:11px; padding:3px 9px; border-radius:4px; cursor:pointer; }
+/* HISTORY */
+.history-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:8px; cursor:pointer; }
+.history-item:hover { border-color:rgba(0,229,255,.3); }
+.history-meta { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); margin-bottom:5px; }
+.history-preview { font-size:12px; color:var(--muted2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* TIMER */
+.timer-display { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:var(--accent); letter-spacing:3px; }
+/* LOADER */
+.ld { display:inline-flex; gap:4px; align-items:center; }
+.ld span { width:5px; height:5px; background:var(--accent); border-radius:50%; animation:ld .6s infinite alternate; }
+.ld span:nth-child(2){animation-delay:.15s} .ld span:nth-child(3){animation-delay:.3s}
+@keyframes ld { from{opacity:.2} to{opacity:1} }
+/* ALERTS */
+.alert { padding:9px 13px; border-radius:6px; font-size:11px; margin-bottom:14px; border-left:2px solid; font-family:'DM Mono',monospace; line-height:1.6; }
+.alert-info { background:rgba(0,229,255,.04); border-color:var(--accent); color:var(--muted2); }
+.alert-warn { background:rgba(255,183,0,.04); border-color:var(--warn); color:var(--warn); }
+.alert-ok { background:rgba(0,255,136,.04); border-color:var(--green); color:var(--green); }
+/* KEY */
+.key-wrap { position:relative; }
+.key-wrap input { padding-right:70px; margin-bottom:0; }
+.key-tog { position:absolute; right:10px; top:9px; font-family:'DM Mono',monospace; font-size:10px; color:var(--muted2); cursor:pointer; background:none; border:none; }
+
+/* DEEP ALPHA SCANNER */
+.scanner-wrap { margin-top:20px; display:none; }
+.scanner-wrap.visible { display:block; }
+.scanner-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; margin-bottom:14px; color:var(--accent); }
+.scanner-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+@media(max-width:900px){ .scanner-grid { grid-template-columns:1fr; } }
+.scan-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; position:relative; overflow:hidden; }
+.scan-card.top-pick { border-color:rgba(0,255,136,.5); box-shadow:0 0 20px rgba(0,255,136,.08); }
+.scan-card.watch { border-color:rgba(255,183,0,.4); }
+.scan-card.avoid { border-color:rgba(255,61,90,.3); }
+.scan-coin { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; margin-bottom:2px; }
+.scan-price { font-family:'DM Mono',monospace; font-size:13px; color:var(--muted2); margin-bottom:10px; }
+.scan-badge { display:inline-block; font-family:'DM Mono',monospace; font-size:9px; font-weight:700; padding:3px 8px; border-radius:4px; letter-spacing:1px; margin-bottom:10px; }
+.badge-buy { background:rgba(0,255,136,.15); color:var(--green); border:1px solid rgba(0,255,136,.3); }
+.badge-watch { background:rgba(255,183,0,.1); color:var(--warn); border:1px solid rgba(255,183,0,.25); }
+.badge-avoid { background:rgba(255,61,90,.08); color:var(--red); border:1px solid rgba(255,61,90,.2); }
+.badge-top { background:rgba(0,255,136,.25); color:var(--green); border:1px solid var(--green); font-size:10px; }
+.scan-metrics { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+.scan-row { display:flex; justify-content:space-between; align-items:center; font-family:'DM Mono',monospace; font-size:11px; }
+.scan-row-label { color:var(--muted2); }
+.scan-row-val { font-weight:500; }
+.bar-wrap { margin:3px 0 8px; }
+.bar-label { display:flex; justify-content:space-between; font-family:'DM Mono',monospace; font-size:9px; color:var(--muted2); margin-bottom:3px; }
+.bar-bg { background:rgba(255,255,255,.05); border-radius:4px; height:6px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; transition:width .8s ease; }
+.bar-green { background:linear-gradient(90deg,var(--green),rgba(0,255,136,.5)); }
+.bar-warn { background:linear-gradient(90deg,var(--warn),rgba(255,183,0,.5)); }
+.bar-red { background:linear-gradient(90deg,var(--red),rgba(255,61,90,.5)); }
+.bar-blue { background:linear-gradient(90deg,var(--accent),rgba(0,229,255,.5)); }
+.scan-insight { font-size:11px; color:var(--muted2); line-height:1.7; border-top:1px solid var(--border); padding-top:8px; }
+.score-circle { position:absolute; top:12px; right:12px; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:'DM Mono',monospace; }
+.score-num { font-size:14px; font-weight:700; line-height:1; }
+.score-lbl { font-size:8px; color:var(--muted2); }
+.top-pick-banner { background:linear-gradient(90deg,rgba(0,255,136,.15),transparent); border-radius:6px; padding:10px 14px; margin-bottom:12px; display:flex; align-items:center; gap:10px; }
+.tpb-icon { font-size:22px; }
+.tpb-text { font-size:13px; font-weight:700; }
+.tpb-sub { font-size:11px; color:var(--muted2); }
+.ai-deep-wrap { background:var(--card); border:1px solid rgba(123,97,255,.25); border-radius:10px; padding:16px; margin-top:14px; }
+.ai-deep-title { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--accent2); margin-bottom:10px; }
+.ai-deep-text { font-size:13px; line-height:1.85; color:var(--text); }
+
+/* MOBILE */
+.mobile-nav { display:none; }
+@media(max-width:900px) {
+  .sidebar { display:none; }
+  .g2,.g3,.g6 { grid-template-columns:1fr; }
+  .week-grid { grid-template-columns:repeat(3,1fr); }
+  .price-strip { display:none; }
+  .main { padding-bottom:75px; }
+  .content { padding:16px; }
+  .mobile-nav {
+    display:flex; position:fixed; bottom:0; left:0; right:0;
+    background:var(--surface); border-top:1px solid var(--border);
+    z-index:1000; padding:6px 0 10px;
+  }
+  .mob-btn {
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+    padding:4px 2px; cursor:pointer; border:none; background:none;
+    color:var(--muted2); font-family:'Barlow',sans-serif; font-size:9px;
+    font-weight:700; letter-spacing:.5px; transition:color .15s;
+  }
+  .mob-btn.active { color:var(--accent); }
+  .mob-btn .mi { font-size:18px; line-height:1; }
+}
 </style>
 </head>
 <body>
 <div class="shell">
 
-<!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="logo">
     <div class="logo-mark">Neural<span>Alpha</span></div>
     <div class="logo-sub">CONTENT INTELLIGENCE v3</div>
   </div>
-  <div class="nav-item active" onclick="nav(this,'live','Live Marked')"><span class="nav-icon">📡</span> Live Marked</div>
-  <div class="nav-item" onclick="nav(this,'today','Dagens Posts')"><span class="nav-icon">✍️</span> Dagens Posts</div>
-  <div class="nav-item" onclick="nav(this,'planner','Ugeplanner')"><span class="nav-icon">📅</span> Ugeplanner</div>
-  <div class="nav-item" onclick="nav(this,'history','Post Historik')"><span class="nav-icon">📁</span> Post Historik</div>
-  <div class="nav-item" onclick="nav(this,'timer','Post Timer')"><span class="nav-icon">⏱️</span> Post Timer</div>
-  <div class="nav-item" onclick="nav(this,'settings','Indstillinger')"><span class="nav-icon">⚙️</span> Indstillinger</div>
+  <div class="nav-item active" onclick="goTo(this,'live','Live Marked')"><span>📡</span> Live Marked</div>
+  <div class="nav-item" onclick="goTo(this,'today','Dagens Posts')"><span>✍️</span> Dagens Posts</div>
+  <div class="nav-item" onclick="goTo(this,'planner','Ugeplanner')"><span>📅</span> Ugeplanner</div>
+  <div class="nav-item" onclick="goTo(this,'history','Post Historik')"><span>📁</span> Post Historik</div>
+  <div class="nav-item" onclick="goTo(this,'timer','Post Timer')"><span>⏱️</span> Post Timer</div>
+  <div class="nav-item" onclick="goTo(this,'settings','Indstillinger')"><span>⚙️</span> Indstillinger</div>
   <div class="sidebar-bottom">
-    <div class="live-dot" id="live-status">HENTER PRISER...</div>
+    <div class="live-dot" id="live-status">HENTER...</div>
   </div>
 </nav>
 
-<!-- MAIN -->
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">LIVE MARKED</div>
     <div class="price-strip" id="price-strip"></div>
   </div>
-
   <div class="content">
 
-    <!-- LIVE MARKED -->
+    <!-- LIVE -->
     <div id="panel-live" class="panel active">
-      <div class="section-label">Real-time data — auto-opdateret hvert 5. minut</div>
-      <div class="section-title">LIVE MARKEDSDATA</div>
-      <div id="price-alert" class="alert alert-info">⏳ Henter live priser fra CoinGecko...</div>
-      <div class="g6" id="metrics-row" style="margin-bottom:18px;"></div>
+      <div class="sec-label">Auto-opdateret hvert 5. minut</div>
+      <div class="sec-title">LIVE MARKEDSDATA</div>
+      <div id="price-alert" class="alert alert-info">Henter live priser fra CoinGecko...</div>
+      <div class="g6" id="metrics-row"></div>
       <div class="g2">
         <div class="card">
-          <div class="section-label" style="margin-bottom:8px;">MARKET SIGNALS</div>
+          <div class="sec-label" style="margin-bottom:8px">MARKET SIGNALS</div>
           <div id="signals-list"></div>
         </div>
         <div class="card">
-          <div class="section-label" style="margin-bottom:8px;">AI MARKEDSVURDERING</div>
-          <div id="ai-assess" style="font-size:13px;line-height:1.8;color:var(--muted2);">Klik analysér for AI-vurdering.</div>
-          <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-            <button class="btn btn-primary btn-sm" onclick="runAnalysis()" id="analyze-btn">⚡ Analysér</button>
-            <div id="analyze-ld" style="display:none;"><div class="ld"><span></span><span></span><span></span></div></div>
+          <div class="sec-label" style="margin-bottom:8px">AI MARKEDSVURDERING</div>
+          <div id="ai-assess" style="font-size:13px;line-height:1.8;color:var(--muted2)">Klik analysér for AI-vurdering.</div>
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="runAnalysis()" id="analyze-btn">Analysér</button>
+            <div id="analyze-ld" style="display:none"><div class="ld"><span></span><span></span><span></span></div></div>
+          </div>
+
+          <!-- DEEP ALPHA SCANNER OUTPUT -->
+          <div class="scanner-wrap" id="scanner-wrap">
+            <div class="scanner-title">DEEP ALPHA SCANNER</div>
+            <div id="top-pick-banner"></div>
+            <div class="scanner-grid" id="scanner-grid"></div>
+            <div class="ai-deep-wrap" id="ai-deep-wrap" style="display:none">
+              <div class="ai-deep-title">AI DEEP ANALYSIS — NEURALALPHA INTELLIGENCE</div>
+              <div class="ai-deep-text" id="ai-deep-text"></div>
+            </div>
           </div>
         </div>
       </div>
-      <div style="margin-top:14px;">
-        <button class="btn btn-ghost btn-sm" onclick="fetchPrices()">↻ Opdater priser</button>
-      </div>
+      <button class="btn btn-ghost btn-sm" onclick="fetchPrices()">Opdater priser</button>
     </div>
 
-    <!-- DAGENS POSTS -->
+    <!-- TODAY -->
     <div id="panel-today" class="panel">
-      <div class="section-label">Baseret på ugeplanen + live data</div>
-      <div class="section-title">DAGENS POSTS</div>
-
-      <div class="g2" style="margin-bottom:14px;">
+      <div class="sec-label">Baseret på ugeplanen</div>
+      <div class="sec-title">DAGENS POSTS</div>
+      <div class="g2">
         <div class="card">
-          <div class="section-label" style="margin-bottom:6px;">DAGENS TEMA</div>
-          <div id="today-theme" style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:5px;"></div>
-          <div id="today-desc" style="font-size:12px;color:var(--muted2);line-height:1.7;"></div>
+          <div class="sec-label" style="margin-bottom:6px">DAGENS TEMA</div>
+          <div id="today-theme" style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:5px"></div>
+          <div id="today-desc" style="font-size:12px;color:var(--muted2);line-height:1.7"></div>
         </div>
         <div class="card">
-          <div class="section-label" style="margin-bottom:6px;">INDSTILLINGER</div>
+          <div class="sec-label" style="margin-bottom:6px">INDSTILLINGER</div>
           <label>Content type</label>
           <select id="post-type">
-            <option value="auto">🤖 Auto (følg ugeplanen)</option>
-            <option value="alpha">🔥 Alpha Signal</option>
-            <option value="onchain">📊 On-chain Analyse</option>
-            <option value="macro">🌍 Makro + Geopolitik</option>
-            <option value="ai">🤖 AI & Tech</option>
-            <option value="educational">📚 Educational</option>
-            <option value="recap">📋 Weekly Recap</option>
+            <option value="auto">Auto (ugeplanen)</option>
+            <option value="alpha">Alpha Signal</option>
+            <option value="onchain">On-chain Analyse</option>
+            <option value="macro">Makro + Geopolitik</option>
+            <option value="ai">AI og Tech</option>
+            <option value="educational">Educational</option>
+            <option value="recap">Weekly Recap</option>
           </select>
-          <label>Ekstra kontekst (valgfri)</label>
-          <textarea id="extra-ctx" placeholder="Specifikt emne, token, narrativ..."></textarea>
+          <label>Ekstra kontekst</label>
+          <textarea id="extra-ctx" placeholder="Specifikt emne, token..."></textarea>
         </div>
       </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-        <button class="btn btn-primary" id="gen-btn" onclick="generatePosts()">⚡ Generer alle posts</button>
-        <div id="gen-ld" style="display:none;align-items:center;"><div class="ld"><span></span><span></span><span></span></div></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+        <button class="btn btn-primary" id="gen-btn" onclick="generatePosts()">Generer alle posts</button>
+        <div id="gen-ld" style="display:none"><div class="ld"><span></span><span></span><span></span></div></div>
       </div>
-
-      <div id="posts-out" style="display:none;">
-        <hr class="div">
-
-        <!-- X POST 1 -->
+      <div id="posts-out" style="display:none">
+        <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
         <div class="post-wrap">
           <div class="post-header">
-            <div class="post-platform platform-x">𝕏 MORGEN POST — 08:00</div>
+            <div class="post-platform plat-x">X MORGEN POST — 08:00</div>
             <div class="post-actions">
-              <button class="btn btn-img btn-sm" onclick="genImage('x1','morgen market update')">🖼️ Generer billede</button>
-              <button class="btn btn-ar btn-sm" onclick="translatePost('x1','ar1')">🌐 Oversæt til Arabisk</button>
+              <button class="btn btn-img btn-sm" onclick="genImage('x1')">Billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x1','ar1')">Arabisk</button>
               <button class="copy-btn" onclick="cp('x1')">COPY</button>
             </div>
           </div>
           <div class="post-box" id="x1"></div>
-          <div class="img-placeholder" id="img-x1">🖼️ Billede genereres via Gemini Imagen...</div>
-          <img class="img-preview" id="imgprev-x1" alt="Generated image">
-          <div class="post-box arabic" id="ar1" style="display:none;margin-top:8px;"></div>
+          <div id="img-msg-x1" class="alert alert-info" style="display:none;margin-top:8px"></div>
+          <div class="post-box arabic" id="ar1" style="display:none;margin-top:8px"></div>
         </div>
-
-        <!-- X POST 2 -->
         <div class="post-wrap">
           <div class="post-header">
-            <div class="post-platform platform-x">𝕏 EFTERMIDDAG POST — 14:00</div>
+            <div class="post-platform plat-x">X EFTERMIDDAG — 14:00</div>
             <div class="post-actions">
-              <button class="btn btn-img btn-sm" onclick="genImage('x2','crypto market afternoon')">🖼️ Generer billede</button>
-              <button class="btn btn-ar btn-sm" onclick="translatePost('x2','ar2')">🌐 Oversæt til Arabisk</button>
+              <button class="btn btn-img btn-sm" onclick="genImage('x2')">Billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x2','ar2')">Arabisk</button>
               <button class="copy-btn" onclick="cp('x2')">COPY</button>
             </div>
           </div>
           <div class="post-box" id="x2"></div>
-          <div class="img-placeholder" id="img-x2"></div>
-          <img class="img-preview" id="imgprev-x2" alt="Generated image">
-          <div class="post-box arabic" id="ar2" style="display:none;margin-top:8px;"></div>
+          <div id="img-msg-x2" class="alert alert-info" style="display:none;margin-top:8px"></div>
+          <div class="post-box arabic" id="ar2" style="display:none;margin-top:8px"></div>
         </div>
-
-        <!-- X POST 3 -->
         <div class="post-wrap">
           <div class="post-header">
-            <div class="post-platform platform-x">𝕏 AFTEN POST — 20:00</div>
+            <div class="post-platform plat-x">X AFTEN — 20:00</div>
             <div class="post-actions">
-              <button class="btn btn-img btn-sm" onclick="genImage('x3','crypto evening deep analysis')">🖼️ Generer billede</button>
-              <button class="btn btn-ar btn-sm" onclick="translatePost('x3','ar3')">🌐 Oversæt til Arabisk</button>
+              <button class="btn btn-img btn-sm" onclick="genImage('x3')">Billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('x3','ar3')">Arabisk</button>
               <button class="copy-btn" onclick="cp('x3')">COPY</button>
             </div>
           </div>
           <div class="post-box" id="x3"></div>
-          <div class="img-placeholder" id="img-x3"></div>
-          <img class="img-preview" id="imgprev-x3" alt="Generated image">
-          <div class="post-box arabic" id="ar3" style="display:none;margin-top:8px;"></div>
+          <div id="img-msg-x3" class="alert alert-info" style="display:none;margin-top:8px"></div>
+          <div class="post-box arabic" id="ar3" style="display:none;margin-top:8px"></div>
         </div>
-
-        <!-- INSTAGRAM -->
         <div class="post-wrap">
           <div class="post-header">
-            <div class="post-platform platform-ig">📸 INSTAGRAM CAPTION + HASHTAGS</div>
+            <div class="post-platform plat-ig">INSTAGRAM CAPTION</div>
             <div class="post-actions">
-              <button class="btn btn-img btn-sm" onclick="genImage('ig1','instagram crypto carousel visual')">🖼️ Generer billede</button>
-              <button class="btn btn-ar btn-sm" onclick="translatePost('ig1','ar-ig')">🌐 Oversæt til Arabisk</button>
+              <button class="btn btn-img btn-sm" onclick="genImage('ig1')">Billede</button>
+              <button class="btn btn-ar btn-sm" onclick="translatePost('ig1','ar-ig')">Arabisk</button>
               <button class="copy-btn" onclick="cp('ig1')">COPY</button>
             </div>
           </div>
           <div class="post-box" id="ig1"></div>
-          <div class="img-placeholder" id="img-ig1"></div>
-          <img class="img-preview" id="imgprev-ig1" alt="Generated image">
-          <div class="post-box arabic" id="ar-ig" style="display:none;margin-top:8px;"></div>
+          <div id="img-msg-ig1" class="alert alert-info" style="display:none;margin-top:8px"></div>
+          <div class="post-box arabic" id="ar-ig" style="display:none;margin-top:8px"></div>
         </div>
-
-        <!-- HASHTAG OPTIMIZER -->
-        <div class="card" style="margin-bottom:16px;">
-          <div class="section-label" style="margin-bottom:8px;">🏷️ HASHTAG OPTIMIZER</div>
-          <div style="font-size:12px;color:var(--muted2);margin-bottom:8px;">Klik for at kopiere individuelle hashtags:</div>
+        <div class="card">
+          <div class="sec-label" style="margin-bottom:8px">HASHTAG OPTIMIZER</div>
           <div class="hashtag-box" id="hashtags"></div>
         </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" onclick="generatePosts()">↻ Regenerer</button>
-          <button class="btn btn-primary btn-sm" onclick="savePosts()">💾 Gem til historik</button>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-ghost btn-sm" onclick="generatePosts()">Regenerer</button>
+          <button class="btn btn-primary btn-sm" onclick="savePosts()">Gem til historik</button>
         </div>
       </div>
     </div>
 
-    <!-- UGEPLANNER -->
+    <!-- PLANNER -->
     <div id="panel-planner" class="panel">
-      <div class="section-label">NeuralAlpha Content Strategi</div>
-      <div class="section-title">UGEPLANNER</div>
-      <div class="week-grid" id="week-grid" style="margin-bottom:20px;"></div>
-      <hr class="div">
-      <div class="section-label" style="margin-bottom:10px;">DETALJERET UGEPLAN</div>
+      <div class="sec-label">NeuralAlpha Content Strategi</div>
+      <div class="sec-title">UGEPLANNER</div>
+      <div class="week-grid" id="week-grid"></div>
       <div id="week-detail"></div>
     </div>
 
-    <!-- POST HISTORIK -->
+    <!-- HISTORY -->
     <div id="panel-history" class="panel">
-      <div class="section-label">Gemte posts</div>
-      <div class="section-title">POST HISTORIK</div>
-      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button class="btn btn-ghost btn-sm" onclick="clearHistory()">🗑️ Ryd historik</button>
+      <div class="sec-label">Gemte posts</div>
+      <div class="sec-title">POST HISTORIK</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn btn-ghost btn-sm" onclick="clearHistory()">Ryd historik</button>
       </div>
       <div id="history-list"></div>
     </div>
 
-    <!-- POST TIMER -->
+    <!-- TIMER -->
     <div id="panel-timer" class="panel">
-      <div class="section-label">Næste optimale postetidspunkt</div>
-      <div class="section-title">POST TIMER</div>
+      <div class="sec-label">Naeste optimale postetidspunkt</div>
+      <div class="sec-title">POST TIMER</div>
       <div class="g3">
-        <div class="card" style="text-align:center;">
-          <div class="section-label" style="margin-bottom:8px;">𝕏 MORGEN POST</div>
+        <div class="card" style="text-align:center">
+          <div class="sec-label" style="margin-bottom:8px">MORGEN POST</div>
           <div class="timer-display" id="t-morning">--:--:--</div>
-          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 08:00</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px">Post kl. 08:00</div>
         </div>
-        <div class="card" style="text-align:center;">
-          <div class="section-label" style="margin-bottom:8px;">𝕏 EFTERMIDDAG</div>
+        <div class="card" style="text-align:center">
+          <div class="sec-label" style="margin-bottom:8px">EFTERMIDDAG</div>
           <div class="timer-display" id="t-afternoon">--:--:--</div>
-          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 14:00</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px">Post kl. 14:00</div>
         </div>
-        <div class="card" style="text-align:center;">
-          <div class="section-label" style="margin-bottom:8px;">𝕏 AFTEN + INSTAGRAM</div>
+        <div class="card" style="text-align:center">
+          <div class="sec-label" style="margin-bottom:8px">AFTEN</div>
           <div class="timer-display" id="t-evening">--:--:--</div>
-          <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Post kl. 20:00</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:6px">Post kl. 20:00</div>
         </div>
       </div>
-      <div class="card" style="margin-top:16px;">
-        <div class="section-label" style="margin-bottom:8px;">DATO OG TID NU</div>
-        <div id="current-time" style="font-family:'DM Mono',monospace;font-size:18px;color:var(--accent);"></div>
-        <div style="font-size:12px;color:var(--muted2);margin-top:6px;">Alle tidspunkter er CET/CEST</div>
+      <div class="card" style="margin-top:16px">
+        <div class="sec-label" style="margin-bottom:8px">TID NU</div>
+        <div id="current-time" style="font-family:'DM Mono',monospace;font-size:16px;color:var(--accent)"></div>
       </div>
     </div>
 
-    <!-- INDSTILLINGER -->
+    <!-- SETTINGS -->
     <div id="panel-settings" class="panel">
-      <div class="section-label">Konfiguration</div>
-      <div class="section-title">INDSTILLINGER</div>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Gemini API Nøgle</div>
-        <div class="alert alert-info">Hent gratis nøgle på <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com/apikey</a> — kræver kun Google-konto</div>
+      <div class="sec-label">Konfiguration</div>
+      <div class="sec-title">INDSTILLINGER</div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px">Gemini API Nogle</div>
+        <div class="alert alert-info">Hent gratis noegle pa <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com/apikey</a></div>
         <label>API KEY</label>
-        <div class="key-wrap" style="margin-bottom:10px;">
+        <div class="key-wrap" style="margin-bottom:10px">
           <input type="password" id="api-key" placeholder="AIzaSy...">
           <button class="key-tog" onclick="togKey()">VIS</button>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <button class="btn btn-primary btn-sm" onclick="saveKey()">💾 Gem nøgle</button>
-          <span id="key-st" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);"></span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">Gem noegle</button>
+          <span id="key-st" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)"></span>
         </div>
       </div>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Manuel Prisindtastning</div>
-        <div class="alert alert-warn">Bruges kun hvis live-hentning fejler — indsæt fra Binance/CMC</div>
+      <div class="card">
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px">Manuel Prisindtastning</div>
+        <div class="alert alert-warn">Bruges hvis live-hentning fejler</div>
         <div class="g3">
           <div><label>BTC (USD)</label><input type="number" id="man-btc" placeholder="67500"></div>
           <div><label>ETH (USD)</label><input type="number" id="man-eth" placeholder="3200"></div>
@@ -363,17 +410,15 @@ select option{background:var(--surface);}
         </div>
         <div class="g3">
           <div><label>BTC 24H %</label><input type="number" id="man-btc-c" placeholder="2.4"></div>
-          <div><label>ETH 24H %</label><input type="number" id="man-eth-c" placeholder="1.1"></div>
-          <div><label>FEAR & GREED</label><input type="number" id="man-fng" placeholder="65"></div>
+          <div><label>FEAR AND GREED</label><input type="number" id="man-fng" placeholder="65"></div>
+          <div><label>TRENDING</label><input type="text" id="man-trend" placeholder="AI tokens, RWA"></div>
         </div>
         <div class="g3">
-          <div><label>BOSON (USD)</label><input type="number" id="man-boson" placeholder="0.85"></div>
+          <div><label>BOSON (USD)</label><input type="number" id="man-boson" placeholder="0.04"></div>
           <div><label>ICP (USD)</label><input type="number" id="man-icp" placeholder="8.5"></div>
           <div><label>DOT (USD)</label><input type="number" id="man-dot" placeholder="7.2"></div>
         </div>
-        <label>TRENDING NARRATIV</label>
-        <input type="text" id="man-trend" placeholder="eks. AI tokens, RWA, BTC ETF flows" style="margin-bottom:10px;">
-        <button class="btn btn-primary btn-sm" onclick="saveManual()">💾 Brug disse priser</button>
+        <button class="btn btn-primary btn-sm" onclick="saveManual()">Brug disse priser</button>
       </div>
     </div>
 
@@ -381,37 +426,43 @@ select option{background:var(--surface);}
 </div>
 </div>
 
-<script>
-// ─── STATE ───────────────────────────────
-let prices = {};
-let analysisCache = '';
-let postHistory = JSON.parse(localStorage.getItem('post_history') || '[]');
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mob-btn active" id="mob-live" onclick="mobGoTo(this,'live','Live Marked')"><span class="mi">📡</span>MARKED</button>
+  <button class="mob-btn" id="mob-today" onclick="mobGoTo(this,'today','Dagens Posts')"><span class="mi">✍️</span>POSTS</button>
+  <button class="mob-btn" id="mob-planner" onclick="mobGoTo(this,'planner','Ugeplanner')"><span class="mi">📅</span>PLAN</button>
+  <button class="mob-btn" id="mob-history" onclick="mobGoTo(this,'history','Historik')"><span class="mi">📁</span>HISTORIK</button>
+  <button class="mob-btn" id="mob-settings" onclick="mobGoTo(this,'settings','Indstillinger')"><span class="mi">⚙️</span>INDST.</button>
+</nav>
 
-// ─── WEEKLY PLAN ─────────────────────────
-const WEEKLY_X = [
-  {day:'Søn',theme:'Uge-recap',desc:'Weekly summary and what to watch next week',type:'recap'},
-  {day:'Man',theme:'Makro-setup',desc:"This week's macro setup — key levels and catalysts",type:'macro'},
+<script>
+var prices = {};
+var analysisCache = '';
+var postHistory = JSON.parse(localStorage.getItem('post_history') || '[]');
+
+var WEEKLY_X = [
+  {day:'Son',theme:'Uge-recap',desc:'Weekly summary and what to watch next week',type:'recap'},
+  {day:'Man',theme:'Makro-setup',desc:"This week's macro setup - key levels and catalysts",type:'macro'},
   {day:'Tir',theme:'On-chain + Smart Money',desc:'On-chain data and smart money movements',type:'onchain'},
-  {day:'Ons',theme:'AI & Tech',desc:'AI and tech news linked to crypto infrastructure',type:'ai'},
+  {day:'Ons',theme:'AI og Tech',desc:'AI and tech news linked to crypto infrastructure',type:'ai'},
   {day:'Tor',theme:'Geopolitik + Energi',desc:'Geopolitics and energy markets impact on Bitcoin',type:'macro'},
-  {day:'Fre',theme:'Vinder & Taber',desc:"This week's biggest winner and loser — with data",type:'alpha'},
-  {day:'Lør',theme:'Dybdeanalyse',desc:'Deep dive into one specific asset or trend',type:'onchain'}
+  {day:'Fre',theme:'Vinder og Taber',desc:"This week's biggest winner and loser with data",type:'alpha'},
+  {day:'Lor',theme:'Dybdeanalyse',desc:'Deep dive into one specific asset or trend',type:'onchain'}
 ];
-const WEEKLY_IG = [
-  {day:'Søn',theme:'Markedsanalyse',desc:'Weekly market analysis carousel',type:'alpha'},
+var WEEKLY_IG = [
+  {day:'Son',theme:'Markedsanalyse',desc:'Weekly market analysis carousel',type:'alpha'},
   {day:'Man',theme:'Quote Card',desc:'Inspiring trading/crypto quote',type:'educational'},
   {day:'Tir',theme:'On-chain Signal',desc:'On-chain signal or token analysis carousel',type:'onchain'},
   {day:'Ons',theme:'Interaktivt',desc:'Community engagement question',type:'educational'},
-  {day:'Tor',theme:'Fejl & Strategier',desc:'Top mistakes or strategies — educational carousel',type:'educational'},
+  {day:'Tor',theme:'Fejl og Strategier',desc:'Top mistakes or strategies educational carousel',type:'educational'},
   {day:'Fre',theme:'Uge-recap',desc:'Weekly recap carousel',type:'recap'},
-  {day:'Lør',theme:'Educational',desc:'Crypto beginner — fundamental concept',type:'educational'}
+  {day:'Lor',theme:'Educational',desc:'Crypto beginner fundamental concept',type:'educational'}
 ];
 
-// ─── NAVIGATION ──────────────────────────
-function nav(el, id, title) {
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+function goTo(el, id, title) {
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   if (el) el.classList.add('active');
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
   document.getElementById('panel-' + id).classList.add('active');
   document.getElementById('topbar-title').textContent = title.toUpperCase();
   if (id === 'planner') renderPlanner();
@@ -420,351 +471,824 @@ function nav(el, id, title) {
   if (id === 'timer') startTimers();
 }
 
-// ─── PRICE FETCH ─────────────────────────
-const TOKEN_IDS = 'bitcoin,ethereum,solana,boson-protocol,internet-computer,polkadot';
-const TOKEN_MAP = {
-  bitcoin: {sym:'BTC',color:'var(--green)'},
-  ethereum: {sym:'ETH',color:'var(--accent)'},
-  solana: {sym:'SOL',color:'var(--accent2)'},
-  'boson-protocol': {sym:'BOSON',color:'var(--warn)'},
-  'internet-computer': {sym:'ICP',color:'#ff6b9d'},
-  polkadot: {sym:'DOT',color:'#e6007a'}
-};
-
-async function fetchPrices() {
-  setAlert('info', '⏳ Henter live priser fra CoinGecko...');
-  document.getElementById('live-status').textContent = 'OPDATERER...';
-  try {
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${TOKEN_IDS}&vs_currencies=usd&include_24hr_change=true`;
-    let cg;
-    try {
-      const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
-      if (!r.ok) throw new Error();
-      cg = await r.json();
-    } catch {
-      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      const r2 = await fetch(proxy, {signal: AbortSignal.timeout(10000)});
-      cg = await r2.json();
-    }
-
-    // FNG
-    let fng = null, fngLabel = null;
-    try {
-      const fr = await fetch('https://api.alternative.me/fng/?limit=1', {signal: AbortSignal.timeout(6000)});
-      if (fr.ok) { const fd = await fr.json(); fng = fd.data?.[0]?.value; fngLabel = fd.data?.[0]?.value_classification; }
-    } catch {}
-
-    prices = {
-      btc: cg.bitcoin?.usd, btcC: cg.bitcoin?.usd_24h_change?.toFixed(2),
-      eth: cg.ethereum?.usd, ethC: cg.ethereum?.usd_24h_change?.toFixed(2),
-      sol: cg.solana?.usd, solC: cg.solana?.usd_24h_change?.toFixed(2),
-      boson: cg['boson-protocol']?.usd, bosonC: cg['boson-protocol']?.usd_24h_change?.toFixed(2),
-      icp: cg['internet-computer']?.usd, icpC: cg['internet-computer']?.usd_24h_change?.toFixed(2),
-      dot: cg.polkadot?.usd, dotC: cg.polkadot?.usd_24h_change?.toFixed(2),
-      fng, fngLabel
-    };
-    updateUI();
-    setAlert('ok', '✅ Live priser opdateret — ' + new Date().toLocaleTimeString('da-DK'));
-    document.getElementById('live-status').textContent = 'LIVE';
-  } catch(e) {
-    setAlert('warn', '⚠️ Live-hentning fejlede — brug manuel prisindtastning under Indstillinger.');
-    document.getElementById('live-status').textContent = 'OFFLINE';
-    const saved = localStorage.getItem('manual_prices');
-    if (saved) { prices = JSON.parse(saved); updateUI(); }
-  }
+function mobGoTo(el, id, title) {
+  document.querySelectorAll('.mob-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('topbar-title').textContent = title.toUpperCase();
+  if (id === 'planner') renderPlanner();
+  if (id === 'today') setTodayTheme();
+  if (id === 'history') renderHistory();
+  if (id === 'timer') startTimers();
 }
 
-function setAlert(type, msg) {
-  const el = document.getElementById('price-alert');
-  el.className = 'alert alert-' + type;
-  el.textContent = msg;
+function fetchTimeout(url, ms) {
+  ms = ms || 8000;
+  return new Promise(function(resolve, reject) {
+    var timer = setTimeout(function() { reject(new Error('timeout')); }, ms);
+    fetch(url).then(function(r) {
+      clearTimeout(timer);
+      resolve(r);
+    }).catch(function(e) {
+      clearTimeout(timer);
+      reject(e);
+    });
+  });
 }
-
-function fp(n, dec=0) { return n ? '$' + parseFloat(n).toLocaleString('en-US', {maximumFractionDigits:dec, minimumFractionDigits:dec}) : '$—'; }
-function fc(c) { if (!c) return ''; const n = parseFloat(c); return (n >= 0 ? '▲ +' : '▼ ') + Math.abs(n).toFixed(2) + '%'; }
+function fvol(v) {
+  if (!v) return 'N/A';
+  v = parseFloat(v);
+  if (v >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(1) + 'M';
+  if (v >= 1e3) return '$' + (v/1e3).toFixed(0) + 'K';
+  return '$' + v.toFixed(0);
+}
+function fmc(v) {
+  if (!v) return 'N/A';
+  v = parseFloat(v);
+  if (v >= 1e12) return '$' + (v/1e12).toFixed(2) + 'T';
+  if (v >= 1e9) return '$' + (v/1e9).toFixed(1) + 'B';
+  if (v >= 1e6) return '$' + (v/1e6).toFixed(0) + 'M';
+  return '$' + v.toFixed(0);
+}
+function fp(n, dec) {
+  dec = dec || 0;
+  if (!n) return '$--';
+  return '$' + parseFloat(n).toLocaleString('en-US', {maximumFractionDigits:dec});
+}
+function fc(c) {
+  if (!c) return '';
+  var n = parseFloat(c);
+  return (n >= 0 ? '+ ' : '- ') + Math.abs(n).toFixed(2) + '%';
+}
 function fgLabel(v) {
-  v = parseInt(v||50);
+  v = parseInt(v || 50);
   if (v >= 75) return 'Extreme Greed';
   if (v >= 55) return 'Greed';
   if (v >= 45) return 'Neutral';
   if (v >= 25) return 'Fear';
   return 'Extreme Fear';
 }
+function setAlert(type, msg) {
+  var el = document.getElementById('price-alert');
+  el.className = 'alert alert-' + type;
+  el.textContent = msg;
+}
+
+async function fetchPrices() {
+  setAlert('info', 'Henter live priser fra CoinGecko...');
+  document.getElementById('live-status').textContent = 'OPDATERER...';
+  var url = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,boson-protocol,internet-computer,polkadot&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true';
+  try {
+    var cg;
+    try {
+      var r = await fetchTimeout(url, 8000);
+      if (!r.ok) throw new Error('fail');
+      cg = await r.json();
+    } catch(e1) {
+      var r2 = await fetchTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(url), 10000);
+      cg = await r2.json();
+    }
+    var fng = null, fngLabel = null;
+    try {
+      var fr = await fetchTimeout('https://api.alternative.me/fng/?limit=1', 6000);
+      if (fr.ok) {
+        var fd = await fr.json();
+        fng = fd.data[0].value;
+        fngLabel = fd.data[0].value_classification;
+      }
+    } catch(e) {}
+    prices = {
+      btc: cg.bitcoin && cg.bitcoin.usd,
+      btcC: cg.bitcoin && parseFloat(cg.bitcoin.usd_24h_change).toFixed(2),
+      btcV: cg.bitcoin && cg.bitcoin.usd_24h_vol,
+      btcMC: cg.bitcoin && cg.bitcoin.usd_market_cap,
+      eth: cg.ethereum && cg.ethereum.usd,
+      ethC: cg.ethereum && parseFloat(cg.ethereum.usd_24h_change).toFixed(2),
+      ethV: cg.ethereum && cg.ethereum.usd_24h_vol,
+      ethMC: cg.ethereum && cg.ethereum.usd_market_cap,
+      sol: cg.solana && cg.solana.usd,
+      solC: cg.solana && parseFloat(cg.solana.usd_24h_change).toFixed(2),
+      solV: cg.solana && cg.solana.usd_24h_vol,
+      solMC: cg.solana && cg.solana.usd_market_cap,
+      boson: cg['boson-protocol'] && cg['boson-protocol'].usd,
+      bosonC: cg['boson-protocol'] && parseFloat(cg['boson-protocol'].usd_24h_change).toFixed(2),
+      bosonV: cg['boson-protocol'] && cg['boson-protocol'].usd_24h_vol,
+      icp: cg['internet-computer'] && cg['internet-computer'].usd,
+      icpC: cg['internet-computer'] && parseFloat(cg['internet-computer'].usd_24h_change).toFixed(2),
+      icpV: cg['internet-computer'] && cg['internet-computer'].usd_24h_vol,
+      dot: cg.polkadot && cg.polkadot.usd,
+      dotC: cg.polkadot && parseFloat(cg.polkadot.usd_24h_change).toFixed(2),
+      dotV: cg.polkadot && cg.polkadot.usd_24h_vol,
+      fng: fng, fngLabel: fngLabel
+    };
+    updateUI();
+    setAlert('ok', 'Live priser opdateret -- ' + new Date().toLocaleTimeString('da-DK'));
+    document.getElementById('live-status').textContent = 'LIVE';
+  } catch(e) {
+    setAlert('warn', 'Live-hentning fejlede -- brug manuel prisindtastning.');
+    document.getElementById('live-status').textContent = 'OFFLINE';
+    var saved = localStorage.getItem('manual_prices');
+    if (saved) { prices = JSON.parse(saved); updateUI(); }
+  }
+}
 
 function updateUI() {
-  // Topbar price strip
-  const tokens = [
+  var tokens = [
     {sym:'BTC', val:prices.btc, chg:prices.btcC},
     {sym:'ETH', val:prices.eth, chg:prices.ethC},
     {sym:'SOL', val:prices.sol, chg:prices.solC},
-    {sym:'ICP', val:prices.icp, chg:prices.icpC},
-    {sym:'DOT', val:prices.dot, chg:prices.dotC},
+    {sym:'ICP', val:prices.icp, chg:prices.icpC, dec:2},
+    {sym:'DOT', val:prices.dot, chg:prices.dotC, dec:2}
   ];
-  document.getElementById('price-strip').innerHTML = tokens.map(t =>
-    `<div class="pp"><span class="sym">${t.sym}</span><span class="val">${fp(t.val)}</span><span class="chg ${parseFloat(t.chg||0)>=0?'up':'dn'}">${fc(t.chg)}</span></div>`
-  ).join('');
+  document.getElementById('price-strip').innerHTML = tokens.map(function(t) {
+    var up = parseFloat(t.chg || 0) >= 0;
+    return '<div class="pp"><span class="sym">' + t.sym + '</span><span class="val">' + fp(t.val, t.dec||0) + '</span><span class="' + (up?'up':'dn') + '"> ' + fc(t.chg) + '</span></div>';
+  }).join('');
 
-  // Metrics grid
-  const all = [
-    {label:'BTC',val:prices.btc,chg:prices.btcC,color:'var(--green)'},
-    {label:'ETH',val:prices.eth,chg:prices.ethC,color:'var(--accent)'},
-    {label:'SOL',val:prices.sol,chg:prices.solC,color:'var(--accent2)'},
-    {label:'BOSON',val:prices.boson,chg:prices.bosonC,color:'var(--warn)',dec:4},
-    {label:'ICP',val:prices.icp,chg:prices.icpC,color:'#ff6b9d',dec:2},
-    {label:'DOT',val:prices.dot,chg:prices.dotC,color:'#e6007a',dec:2},
+  var colors = {btc:'var(--green)',eth:'var(--accent)',sol:'var(--accent2)',boson:'var(--warn)',icp:'#ff6b9d',dot:'#e6007a'};
+  var mets = [
+    {label:'BTC', val:prices.btc, chg:prices.btcC, color:colors.btc},
+    {label:'ETH', val:prices.eth, chg:prices.ethC, color:colors.eth},
+    {label:'SOL', val:prices.sol, chg:prices.solC, color:colors.sol},
+    {label:'BOSON', val:prices.boson, chg:prices.bosonC, color:colors.boson, dec:4},
+    {label:'ICP', val:prices.icp, chg:prices.icpC, color:colors.icp, dec:2},
+    {label:'DOT', val:prices.dot, chg:prices.dotC, color:colors.dot, dec:2}
   ];
-  document.getElementById('metrics-row').innerHTML = all.map(t =>
-    `<div class="metric"><div class="metric-label">${t.label}</div><div class="metric-val" style="color:${t.color}">${fp(t.val, t.dec||0)}</div><div class="metric-sub ${parseFloat(t.chg||0)>=0?'up':'dn'}">${fc(t.chg)}</div></div>`
-  ).join('') + `<div class="metric"><div class="metric-label">FEAR & GREED</div><div class="metric-val" style="color:var(--warn)">${prices.fng||'—'}</div><div class="metric-sub">${prices.fngLabel || fgLabel(prices.fng)}</div></div>`;
+  document.getElementById('metrics-row').innerHTML = mets.map(function(t) {
+    var up = parseFloat(t.chg || 0) >= 0;
+    return '<div class="metric"><div class="metric-label">' + t.label + '</div><div class="metric-val" style="color:' + t.color + '">' + fp(t.val, t.dec||0) + '</div><div class="metric-sub ' + (up?'up':'dn') + '">' + fc(t.chg) + '</div></div>';
+  }).join('') + '<div class="metric"><div class="metric-label">FEAR AND GREED</div><div class="metric-val" style="color:var(--warn)">' + (prices.fng || '--') + '</div><div class="metric-sub">' + (prices.fngLabel || fgLabel(prices.fng)) + '</div></div>';
 
-  // Signals
-  const btcC = parseFloat(prices.btcC||0);
-  const fng = parseInt(prices.fng||50);
-  const sigs = [
-    {t:btcC>1?'bull':btcC<-1?'bear':'neut',txt:`BTC ${btcC>=0?'+':''}${btcC}% — ${btcC>1?'Bullish momentum':btcC<-1?'Bearish':'Neutral'}`},
-    {t:fng>60?'bull':fng<40?'bear':'neut',txt:`Fear & Greed: ${prices.fng||'?'}/100 — ${fgLabel(fng)}`},
-    {t:'neut',txt:`ICP: ${fp(prices.icp,2)} | DOT: ${fp(prices.dot,2)} | BOSON: ${fp(prices.boson,4)}`},
-    {t:'neut',txt:`ETH: ${fp(prices.eth)} | SOL: ${fp(prices.sol)}`},
+  var btcC = parseFloat(prices.btcC || 0);
+  var fng = parseInt(prices.fng || 50);
+  var sigs = [
+    {t: btcC > 1 ? 'bull' : btcC < -1 ? 'bear' : 'neut', txt: 'BTC ' + (btcC >= 0 ? '+' : '') + btcC + '% -- ' + (btcC > 1 ? 'Bullish momentum' : btcC < -1 ? 'Bearish' : 'Neutral')},
+    {t: fng > 60 ? 'bull' : fng < 40 ? 'bear' : 'neut', txt: 'Fear and Greed: ' + (prices.fng || '?') + '/100 -- ' + fgLabel(fng)},
+    {t: 'neut', txt: 'ICP: ' + fp(prices.icp, 2) + ' | DOT: ' + fp(prices.dot, 2) + ' | BOSON: ' + fp(prices.boson, 4)},
+    {t: 'neut', txt: 'ETH: ' + fp(prices.eth) + ' | SOL: ' + fp(prices.sol)}
   ];
-  document.getElementById('signals-list').innerHTML = sigs.map(s =>
-    `<div class="sig-row"><div class="sig-dot ${s.t}"></div><span>${s.txt}</span></div>`
-  ).join('');
+  document.getElementById('signals-list').innerHTML = sigs.map(function(s) {
+    return '<div class="sig-row"><div class="sig-dot ' + s.t + '"></div><span>' + s.txt + '</span></div>';
+  }).join('');
 }
 
-// ─── AI ──────────────────────────────────
 async function callGemini(prompt) {
-  const k = localStorage.getItem('gemini_key');
+  var k = localStorage.getItem('gemini_key');
   if (!k) return null;
+  // Try models in order until one works
+  var models = ['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-flash-latest','gemini-pro'];
+  for (var mi = 0; mi < models.length; mi++) {
+    try {
+      var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + models[mi] + ':generateContent?key=' + k, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.75,maxOutputTokens:2000}})
+      });
+      var d = await r.json();
+      if (d.candidates && d.candidates[0] && d.candidates[0].content) {
+        return d.candidates[0].content.parts[0].text;
+      }
+      // If blocked or error, try next model
+      if (d.error) { console.warn('Gemini model ' + models[mi] + ' error:', d.error.message); continue; }
+    } catch(e) { console.warn('Gemini fetch error:', e); }
+  }
+  return null;
+}
+
+
+// ─── DEEP ALPHA SCANNER ───────────────────────────────────────────
+async function fetchExtendedData(coinId) {
+  var results = {ohlc: null, chart: null, chart30: null};
   try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${k}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{temperature:0.75,maxOutputTokens:2000}})
-    });
-    const d = await r.json();
-    return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
-  } catch { return null; }
+    var r1 = await fetchTimeout('https://api.coingecko.com/api/v3/coins/' + coinId + '/ohlc?vs_currency=usd&days=7', 8000);
+    if (r1.ok) results.ohlc = await r1.json();
+  } catch(e) {}
+  try {
+    var r2 = await fetchTimeout('https://api.coingecko.com/api/v3/coins/' + coinId + '/market_chart?vs_currency=usd&days=7&interval=daily', 8000);
+    if (r2.ok) results.chart = await r2.json();
+  } catch(e) {}
+  try {
+    var r3 = await fetchTimeout('https://api.coingecko.com/api/v3/coins/' + coinId + '/market_chart?vs_currency=usd&days=30&interval=daily', 8000);
+    if (r3.ok) results.chart30 = await r3.json();
+  } catch(e) {}
+  return results;
+}
+
+function calcRSI(closes, period) {
+  period = period || 14;
+  if (closes.length < period + 1) return 50;
+  var gains = 0, losses = 0;
+  for (var i = closes.length - period; i < closes.length; i++) {
+    var diff = closes[i] - closes[i-1];
+    if (diff > 0) gains += diff; else losses += Math.abs(diff);
+  }
+  var avgGain = gains / period;
+  var avgLoss = losses / period;
+  if (avgLoss === 0) return 100;
+  var rs = avgGain / avgLoss;
+  return Math.round(100 - (100 / (1 + rs)));
+}
+
+function calcVolumeSpike(volumes) {
+  if (!volumes || volumes.length < 3) return 1;
+  var avg = volumes.slice(0, -1).reduce(function(a,b){return a+b;}, 0) / (volumes.length - 1);
+  var last = volumes[volumes.length - 1];
+  return avg > 0 ? (last / avg) : 1;
+}
+
+function calcPriceVsMA(closes) {
+  if (!closes || closes.length < 3) return 0;
+  var ma = closes.reduce(function(a,b){return a+b;},0) / closes.length;
+  var last = closes[closes.length-1];
+  return ma > 0 ? ((last - ma) / ma * 100) : 0;
+}
+
+function calcAlphaScore(rsi, volSpike, priceVsMA, change24h) {
+  var score = 50;
+  // RSI: sweet spot 35-60 = accumulation zone, not overbought
+  if (rsi >= 30 && rsi <= 55) score += 15;
+  else if (rsi < 30) score += 8; // oversold = potential bounce
+  else if (rsi > 70) score -= 15; // overbought = avoid
+  // Volume spike: sudden increase = money flowing in
+  if (volSpike >= 2.5) score += 20;
+  else if (volSpike >= 1.5) score += 12;
+  else if (volSpike >= 1.2) score += 5;
+  else if (volSpike < 0.8) score -= 10;
+  // Price vs MA: slightly below MA = dip opportunity
+  if (priceVsMA >= -8 && priceVsMA <= -1) score += 12;
+  else if (priceVsMA > 10) score -= 8; // extended above MA
+  else if (priceVsMA < -15) score -= 5; // too far below
+  // 24h change context
+  if (change24h >= -3 && change24h <= -0.5) score += 8; // slight dip = entry
+  else if (change24h < -8) score -= 10; // heavy dump
+  else if (change24h > 5) score += 5; // momentum
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function getTradingSignal(score, rsi, volSpike, priceVsMA, chg) {
+  // Strong BUY: high score, oversold/accumulation RSI, volume spike, slight dip
+  if (score >= 70 && rsi <= 50 && volSpike >= 1.3) {
+    return {action:'BUY', strength:'STRONG', color:'var(--green)',
+      reason: 'RSI i akkumuleringszone + volumenstigning indikerer kapitalindstroemning. Godt entry-vindue.'};
+  }
+  if (score >= 65 && rsi <= 55) {
+    return {action:'BUY', strength:'MODERAT', color:'#5dde8a',
+      reason: 'RSI under midterlinjen med stabil volumen. Moderat entry-mulighed.'};
+  }
+  // HOLD: neutral conditions
+  if (score >= 52 && score < 65) {
+    return {action:'HOLD', strength:'NEUTRAL', color:'var(--warn)',
+      reason: 'Ingen klar retning. Afvent bekraeftelse fra volumen eller RSI-breakout.'};
+  }
+  // SELL signals
+  if (rsi > 68 && chg > 4) {
+    return {action:'SELL', strength:'STERK', color:'var(--red)',
+      reason: 'RSI overkobt + stor daglig stigning. Profittagen anbefales. Risk for korrektion.'};
+  }
+  if (score < 52 && chg < -4) {
+    return {action:'SELL', strength:'UNDGAA', color:'#ff6b6b',
+      reason: 'Lav alpha score + negatv momentum. Undgaa ny position. Eksisterende kan trimmes.'};
+  }
+  return {action:'HOLD', strength:'AFVENT', color:'var(--warn)',
+    reason: 'Utilstraekkelige signaler. Bevar position og monitorér volumenudvikling.'};
+}
+function getSignal(score) {
+  if (score >= 72) return {label:'BUY WINDOW', cls:'badge-buy', cardCls:'top-pick'};
+  if (score >= 52) return {label:'WATCH', cls:'badge-watch', cardCls:'watch'};
+  return {label:'AVOID', cls:'badge-avoid', cardCls:'avoid'};
+}
+
+function scoreColor(score) {
+  if (score >= 72) return 'var(--green)';
+  if (score >= 52) return 'var(--warn)';
+  return 'var(--red)';
+}
+
+function barClass(score) {
+  if (score >= 72) return 'bar-green';
+  if (score >= 52) return 'bar-warn';
+  return 'bar-red';
+}
+
+function rsiInterpret(rsi) {
+  if (rsi <= 30) return {txt:'Oversolgt - mulig bounce', color:'var(--green)'};
+  if (rsi <= 45) return {txt:'Akkumuleringszone', color:'var(--green)'};
+  if (rsi <= 55) return {txt:'Neutral momentum', color:'var(--muted2)'};
+  if (rsi <= 70) return {txt:'Bullish momentum', color:'var(--warn)'};
+  return {txt:'Overkoebt - risiko for korrektion', color:'var(--red)'};
+}
+
+function volInterpret(spike) {
+  if (spike >= 2.5) return {txt:'Massiv kapitalindstroemning', color:'var(--green)'};
+  if (spike >= 1.5) return {txt:'Foerhojet volumen - interesse stigende', color:'var(--green)'};
+  if (spike >= 1.2) return {txt:'Let stigning i volumen', color:'var(--warn)'};
+  if (spike >= 0.8) return {txt:'Normal volumen', color:'var(--muted2)'};
+  return {txt:'Lav volumen - ingen interesse', color:'var(--red)'};
 }
 
 async function runAnalysis() {
   document.getElementById('analyze-btn').disabled = true;
   document.getElementById('analyze-ld').style.display = 'flex';
-  const k = localStorage.getItem('gemini_key');
-  let text = '';
+  document.getElementById('scanner-wrap').classList.remove('visible');
+
+  // Step 1: Basic AI assessment (quick)
+  var k = localStorage.getItem('gemini_key');
+  var text = '';
   if (k && prices.btc) {
-    const p = `You are a professional crypto market analyst for NeuralAlpha. Write a 3-sentence professional market assessment in DANISH based on:
-BTC: ${fp(prices.btc)} (${prices.btcC}% 24h), ETH: ${fp(prices.eth)}, SOL: ${fp(prices.sol)}
-ICP: ${fp(prices.icp,2)}, DOT: ${fp(prices.dot,2)}, BOSON: ${fp(prices.boson,4)}
-Fear & Greed: ${prices.fng}/100 (${fgLabel(prices.fng)})
-Be analytical, direct, no hype. End with a content strategy recommendation for NeuralAlpha.`;
-    const res = await callGemini(p);
+    var p = 'You are a professional crypto market analyst for NeuralAlpha. Write a 3-sentence professional market assessment in DANISH based on: BTC: ' + fp(prices.btc) + ' (' + prices.btcC + '% 24h), ETH: ' + fp(prices.eth) + ', SOL: ' + fp(prices.sol) + ', ICP: ' + fp(prices.icp,2) + ', DOT: ' + fp(prices.dot,2) + ', BOSON: ' + fp(prices.boson,4) + ', Fear and Greed: ' + prices.fng + '/100 (' + fgLabel(prices.fng) + '). Be analytical, direct, no hype. End with a content strategy recommendation for NeuralAlpha.';
+    var res = await callGemini(p);
     if (res) text = res;
   }
   if (!text) {
-    const btcC = parseFloat(prices.btcC||0);
-    text = `Markedet viser ${btcC>1?'bullish':btcC<-1?'bearish':'neutralt'} momentum. BTC på ${fp(prices.btc)} med Fear & Greed ${prices.fng||'?'}/100 (${fgLabel(prices.fng)}). ${btcC>2?'Stærkt engagement-vindue — del alpha nu.':btcC<-2?'Educational content performer bedst nu.':'Analytisk indhold er optimalt i sideways-marked.'}`;
+    var btcC0 = parseFloat(prices.btcC || 0);
+    text = 'Markedet viser ' + (btcC0 > 1 ? 'bullish' : btcC0 < -1 ? 'bearish' : 'neutralt') + ' momentum med BTC pa ' + fp(prices.btc) + '. Fear and Greed ' + (prices.fng || '?') + '/100 (' + fgLabel(prices.fng) + '). ' + (btcC0 > 2 ? 'Staerkt engagement-vindue - del alpha nu.' : btcC0 < -2 ? 'Educational content performer bedst nu.' : 'Analytisk indhold er optimalt i sideways-marked.');
   }
   analysisCache = text;
   document.getElementById('ai-assess').textContent = text;
   document.getElementById('ai-assess').style.color = 'var(--text)';
+
+  // Step 2: Deep Scanner — fetch extended data for all coins
+  var coins = [
+    {sym:'BTC', id:'bitcoin', price:prices.btc, chg:prices.btcC, vol:prices.btcV, mc:prices.btcMC, color:'var(--green)'},
+    {sym:'ETH', id:'ethereum', price:prices.eth, chg:prices.ethC, vol:prices.ethV, mc:prices.ethMC, color:'var(--accent)'},
+    {sym:'SOL', id:'solana', price:prices.sol, chg:prices.solC, vol:prices.solV, mc:prices.solMC, color:'var(--accent2)'},
+    {sym:'ICP', id:'internet-computer', price:prices.icp, chg:prices.icpC, vol:prices.icpV, color:'#ff6b9d', dec:2},
+    {sym:'DOT', id:'polkadot', price:prices.dot, chg:prices.dotC, vol:prices.dotV, color:'#e6007a', dec:2},
+    {sym:'BOSON', id:'boson-protocol', price:prices.boson, chg:prices.bosonC, vol:prices.bosonV, color:'var(--warn)', dec:4}
+  ];
+
+  var scanResults = [];
+  for (var ci = 0; ci < coins.length; ci++) {
+    var coin = coins[ci];
+    var ext = await fetchExtendedData(coin.id);
+    var closes = [], volumes = [];
+    if (ext.ohlc && ext.ohlc.length) {
+      closes = ext.ohlc.map(function(c){return c[4];});
+    } else if (ext.chart && ext.chart.prices) {
+      closes = ext.chart.prices.map(function(p){return p[1];});
+    }
+    if (ext.chart && ext.chart.total_volumes) {
+      volumes = ext.chart.total_volumes.map(function(v){return v[1];});
+    }
+    var avgVol30 = null;
+    if (ext.chart30 && ext.chart30.total_volumes && ext.chart30.total_volumes.length > 5) {
+      var vols30 = ext.chart30.total_volumes.map(function(v){return v[1];});
+      avgVol30 = vols30.reduce(function(a,b){return a+b;},0) / vols30.length;
+    }
+    // Fallback: simulate from 24h change if no data
+    if (closes.length < 4) {
+      var chgNum = parseFloat(coin.chg || 0);
+      var baseP = parseFloat(coin.price || 1);
+      closes = [baseP*1.02, baseP*1.01, baseP*0.99, baseP*(1 + chgNum/200), baseP*(1 + chgNum/100), baseP];
+    }
+    var rsi = calcRSI(closes, Math.min(closes.length-1, 7));
+    var volSpike = calcVolumeSpike(volumes);
+    var priceVsMA = calcPriceVsMA(closes);
+    var chgNum2 = parseFloat(coin.chg || 0);
+    var alphaScore = calcAlphaScore(rsi, volSpike, priceVsMA, chgNum2);
+    var tradeSig = getTradingSignal(alphaScore, rsi, volSpike, priceVsMA, chgNum2);
+    // Recalculate volSpike using 30d avg if available
+    var volSpike30 = volSpike;
+    if (avgVol30 && coin.vol) {
+      volSpike30 = parseFloat(coin.vol) / avgVol30;
+    }
+    scanResults.push({
+      sym: coin.sym, price: coin.price, chg: chgNum2, vol: coin.vol, mc: coin.mc,
+      color: coin.color, rsi: rsi, volSpike: volSpike, volSpike30: volSpike30,
+      avgVol30: avgVol30, priceVsMA: priceVsMA,
+      alphaScore: alphaScore, signal: getSignal(alphaScore), tradeSig: tradeSig,
+      dec: coin.dec||0, hasRealData: closes.length >= 6 && volumes.length >= 3
+    });
+  }
+
+  // Sort by alpha score descending
+  scanResults.sort(function(a,b){return b.alphaScore - a.alphaScore;});
+  var topPick = scanResults[0];
+
+  // Render top pick banner
+  var buyCoins = scanResults.filter(function(r){return r.tradeSig.action==='BUY';});
+  var sellCoins = scanResults.filter(function(r){return r.tradeSig.action==='SELL';});
+  var bannerHtml = '<div class="top-pick-banner">' +
+    '<div class="tpb-icon">🎯</div>' +
+    '<div><div class="tpb-text" style="color:var(--green)">' + topPick.sym + ' er dagens top alpha-pick  —  ' + topPick.tradeSig.action + ' ' + topPick.tradeSig.strength + '</div>' +
+    '<div class="tpb-sub">Alpha Score ' + topPick.alphaScore + '/100 | RSI ' + topPick.rsi + ' | Vol ' + fvol(topPick.vol) + ' | Spike ' + topPick.volSpike.toFixed(2) + 'x</div></div></div>';
+  if (buyCoins.length > 0) {
+    bannerHtml += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+    buyCoins.forEach(function(c){
+      bannerHtml += '<div style="background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);border-radius:8px;padding:7px 14px;font-family:DM Mono,monospace;font-size:11px"><span style="color:var(--green);font-weight:700">▲ KOB: ' + c.sym + '</span> <span style="color:var(--muted2)">Score ' + c.alphaScore + '</span></div>';
+    });
+    bannerHtml += '</div>';
+  }
+  if (sellCoins.length > 0) {
+    bannerHtml += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+    sellCoins.forEach(function(c){
+      bannerHtml += '<div style="background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.25);border-radius:8px;padding:7px 14px;font-family:DM Mono,monospace;font-size:11px"><span style="color:var(--red);font-weight:700">▼ SAELG/UNDGAA: ' + c.sym + '</span> <span style="color:var(--muted2)">RSI ' + c.rsi + '</span></div>';
+    });
+    bannerHtml += '</div>';
+  }
+  document.getElementById('top-pick-banner').innerHTML = bannerHtml;
+
+  // Render scanner cards
+  var gridHtml = '';
+  for (var i2 = 0; i2 < scanResults.length; i2++) {
+    var r = scanResults[i2];
+    var rsiI = rsiInterpret(r.rsi);
+    var volI = volInterpret(r.volSpike);
+    var maDir = r.priceVsMA >= 0 ? '+' : '';
+    var isTop = i2 === 0;
+    var tsColor = r.tradeSig.action==='BUY'?'rgba(0,255,136,.12)':r.tradeSig.action==='SELL'?'rgba(255,61,90,.1)':'rgba(255,183,0,.08)';
+    var tsIcon = r.tradeSig.action==='BUY'?'▲ ':r.tradeSig.action==='SELL'?'▼ ':'◆ ';
+    gridHtml +=
+      '<div class="scan-card ' + r.signal.cardCls + '">' +
+      '<div class="score-circle" style="background:' + (isTop ? 'rgba(0,255,136,.12)' : 'rgba(255,255,255,.04)') + ';border:1px solid ' + scoreColor(r.alphaScore) + '">' +
+      '<span class="score-num" style="color:' + scoreColor(r.alphaScore) + '">' + r.alphaScore + '</span>' +
+      '<span class="score-lbl">SCORE</span></div>' +
+      '<div class="scan-coin" style="color:' + r.color + '">' + r.sym + (isTop ? ' 🎯' : '') + '</div>' +
+      '<div class="scan-price">' + fp(r.price, r.dec) + ' <span style="color:' + (r.chg>=0?'var(--green)':'var(--red)') + '">' + (r.chg>=0?'+':'') + r.chg + '%</span></div>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">' +
+      '<span class="scan-badge ' + r.signal.cls + '">' + r.signal.label + '</span>' +
+      (isTop ? '<span class="scan-badge badge-top">TOP ALPHA</span>' : '') + '</div>' +
+      '<div style="background:' + tsColor + ';border:1px solid ' + r.tradeSig.color + ';border-radius:8px;padding:8px 10px;margin-bottom:10px">' +
+      '<div style="font-family:DM Mono,monospace;font-size:11px;font-weight:700;color:' + r.tradeSig.color + ';letter-spacing:1px;margin-bottom:3px">' + tsIcon + r.tradeSig.action + '  —  ' + r.tradeSig.strength + '</div>' +
+      '<div style="font-size:11px;color:var(--muted2);line-height:1.6">' + r.tradeSig.reason + '</div></div>' +
+      '<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px">' +
+      '<div style="font-family:DM Mono,monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;margin-bottom:8px">KEY STATS</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:5px">' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted2)">Volume</span>' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--text);font-weight:600">' + fvol(r.vol) + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted2)">Average Volume (30D)</span>' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted2)">' + (r.avgVol30 ? fvol(r.avgVol30) : 'N/A') + '</span></div>' +
+      (r.vol && r.avgVol30 ? (function(){
+        var pct = ((parseFloat(r.vol) / r.avgVol30) - 1) * 100;
+        var col = pct > 20 ? "var(--green)" : pct < -20 ? "var(--red)" : "var(--warn)";
+        var lbl = pct > 50 ? "Usaedvanlig hoj volumen" : pct > 20 ? "Over gennemsnit" : pct < -20 ? "Under gennemsnit" : "Normal volumen";
+        var icon = pct > 20 ? "▲" : pct < -20 ? "▼" : "◆";
+        return '<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid var(--border)">' +
+          '<span style="font-family:DM Mono,monospace;font-size:10px;color:' + col + '">' + icon + ' ' + lbl + '</span>' +
+          '<span style="font-family:DM Mono,monospace;font-size:10px;font-weight:700;color:' + col + '">' + (pct>=0?"+":"") + pct.toFixed(1) + '% vs 30D avg</span></div>';
+      })() : '') +
+      (r.mc ? '<div style="display:flex;justify-content:space-between;margin-top:5px">' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted2)">Market Cap</span>' +
+      '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--text)">' + fmc(r.mc) + '</span></div>' : '') +
+      '</div>' +
+      '<div class="scan-metrics">' +
+
+      '<div class="scan-row"><span class="scan-row-label">RSI (7d)</span><span class="scan-row-val" style="color:' + rsiI.color + '">' + r.rsi + '</span></div>' +
+      '<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill ' + (r.rsi<45?'bar-green':r.rsi>65?'bar-red':'bar-warn') + '" style="width:' + r.rsi + '%"></div></div></div>' +
+      '<div style="font-family:DM Mono,monospace;font-size:9px;margin-bottom:4px;color:' + rsiI.color + '">' + rsiI.txt + '</div>' +
+
+      '<div class="scan-row"><span class="scan-row-label">Volumen spike</span><span class="scan-row-val" style="color:' + volI.color + '">' + r.volSpike.toFixed(2) + 'x</span></div>' +
+      '<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill ' + (r.volSpike>1.5?'bar-green':r.volSpike>1?'bar-warn':'bar-red') + '" style="width:' + Math.min(100,r.volSpike*33) + '%"></div></div></div>' +
+      '<div style="font-family:DM Mono,monospace;font-size:9px;margin-bottom:4px;color:' + volI.color + '">' + volI.txt + '</div>' +
+
+      '<div class="scan-row"><span class="scan-row-label">Pris vs 7d MA</span><span class="scan-row-val" style="color:' + (r.priceVsMA>0?'var(--green)':r.priceVsMA<-10?'var(--red)':'var(--warn)') + '">' + maDir + r.priceVsMA.toFixed(1) + '%</span></div>' +
+      '<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill bar-blue" style="width:' + Math.min(100,50+r.priceVsMA*2) + '%"></div></div></div>' +
+
+      '</div>' +
+      '<div class="bar-label"><span>Alpha Score</span><span>' + r.alphaScore + '/100</span></div>' +
+      '<div class="bar-bg"><div class="bar-fill ' + barClass(r.alphaScore) + '" style="width:' + r.alphaScore + '%"></div></div>' +
+
+      (r.hasRealData ? '<div style="font-family:DM Mono,monospace;font-size:9px;color:var(--green);margin-top:6px">DATA: LIVE COINGECKO</div>' :
+       '<div style="font-family:DM Mono,monospace;font-size:9px;color:var(--muted2);margin-top:6px">DATA: ESTIMERET FRA 24H</div>') +
+      '</div>';
+  }
+  document.getElementById('scanner-grid').innerHTML = gridHtml;
+
+  // Step 3: AI deep analysis of top 2 picks
+  var ai2 = '';
+  if (k) {
+    var top2 = scanResults.slice(0,2).map(function(r){
+      return r.sym + ': Score ' + r.alphaScore + ', RSI ' + r.rsi + ', Vol ' + r.volSpike.toFixed(2) + 'x, PriceVsMA ' + r.priceVsMA.toFixed(1) + '%, 24h: ' + r.chg + '%';
+    }).join(' | ');
+    var allScores = scanResults.map(function(r){ return r.sym + ':' + r.alphaScore; }).join(', ');
+    var allSignals = scanResults.map(function(r){ return r.sym + ':' + r.tradeSig.action + '(' + r.alphaScore + ')'; }).join(', ');
+    var volData = scanResults.map(function(r){ return r.sym + ':vol=' + fvol(r.vol); }).join(', ');
+    var deepPrompt = 'Du er en professionel on-chain krypto analytiker for NeuralAlpha. Skriv en DYB analyse PA DANSK baseret pa disse real-time data.' +
+    ' Aktuelle signaler: ' + allSignals +
+    ' Volumen data: ' + volData +
+    ' Fear og Greed: ' + (prices.fng||50) + '/100.' +
+    ' BTC: ' + fp(prices.btc) + ' (' + prices.btcC + '% 24h).' +
+    ' Top alpha pick: ' + scanResults[0].sym + ' score=' + scanResults[0].alphaScore + ' RSI=' + scanResults[0].rsi + ' volspike=' + scanResults[0].volSpike.toFixed(2) + 'x.' +
+    ' Din analyse skal indeholde ALLE disse 5 punkter, hvert med egen sektion og emoji:' +
+    ' 1) MARKEDSSITUATION: Forklar det overordnede marked ud fra Fear and Greed og BTC momentum.' +
+    ' 2) TOP KOB-KANDIDAT: Hvilken coin har det bedste entry-vindue lige nu og HVORFOR (RSI, volumen, pris vs MA).' +
+    ' 3) SALGS-SIGNAL: Er der nogen coins man bor trimme eller undgaa at kobe nu.' +
+    ' 4) SMART MONEY SPORET: Hvad siger volumendataene om kapitalbevaegelser - er der tegn pa akkumulering eller distribution.' +
+    ' 5) NEURALALPHA POST-VINKEL: Skriv et konkret forslag til et X-opslag der udnytter dagens stoerste signal. Max 2 saetninger, skal vaere alfa-drevet og professionelt.' +
+    ' Vaer konkret, specifik og brug tal fra dataene. Ingen generiske raad.';
+    var deepRes = await callGemini(deepPrompt);
+    if (deepRes) ai2 = deepRes;
+  }
+  if (!ai2) {
+    ai2 = topPick.sym + ' viser den sterkeste akkumuleringsprofil med en Alpha Score pa ' + topPick.alphaScore + '/100. RSI ' + topPick.rsi + ' indikerer ' + rsiInterpret(topPick.rsi).txt.toLowerCase() + ', mens volumen-spike pa ' + topPick.volSpike.toFixed(2) + 'x tyder pa okonomisk kapitalindstroemning. Smart money beveger sig typisk foer retail bemerker trenden - dette er signalet. NeuralAlpha post-vinkel: "Nogen akkumulerer ' + topPick.sym + ' stille og roligt. Her er hvad on-chain data siger."';
+  }
+  document.getElementById('ai-deep-text').textContent = ai2;
+  document.getElementById('ai-deep-wrap').style.display = 'block';
+
+  document.getElementById('scanner-wrap').classList.add('visible');
   document.getElementById('analyze-btn').disabled = false;
   document.getElementById('analyze-ld').style.display = 'none';
 }
 
-// ─── TODAY ───────────────────────────────
 function getTodayIdx() { return new Date().getDay(); }
 function setTodayTheme() {
-  const i = getTodayIdx();
-  document.getElementById('today-theme').textContent = `𝕏 ${WEEKLY_X[i].theme}  |  📸 ${WEEKLY_IG[i].theme}`;
-  document.getElementById('today-desc').innerHTML = `<b>X (3 posts):</b> ${WEEKLY_X[i].desc}<br><b>Instagram:</b> ${WEEKLY_IG[i].desc}`;
+  var i = getTodayIdx();
+  document.getElementById('today-theme').textContent = 'X: ' + WEEKLY_X[i].theme + '  |  Instagram: ' + WEEKLY_IG[i].theme;
+  document.getElementById('today-desc').innerHTML = '<b>X (3 posts):</b> ' + WEEKLY_X[i].desc + '<br><b>Instagram:</b> ' + WEEKLY_IG[i].desc;
 }
 
-// ─── GENERATE POSTS ──────────────────────
 async function generatePosts() {
   document.getElementById('gen-btn').disabled = true;
   document.getElementById('gen-ld').style.display = 'flex';
   document.getElementById('posts-out').style.display = 'none';
 
-  const i = getTodayIdx();
-  const xPlan = WEEKLY_X[i];
-  const igPlan = WEEKLY_IG[i];
-  const extra = document.getElementById('extra-ctx').value;
-  const typeOv = document.getElementById('post-type').value;
-  const k = localStorage.getItem('gemini_key');
+  var i = getTodayIdx();
+  var xPlan = WEEKLY_X[i];
+  var igPlan = WEEKLY_IG[i];
+  var extra = document.getElementById('extra-ctx').value;
+  var k = localStorage.getItem('gemini_key');
+  var btcC = parseFloat(prices.btcC || 0);
+  var fng = parseInt(prices.fng || 50);
+  var x1='', x2='', x3='', ig='';
 
-  let x1='',x2='',x3='',ig='';
-  const btcC = parseFloat(prices.btcC||0);
-  const fng = parseInt(prices.fng||50);
+  var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var today = dayNames[i];
+  var dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  // Build rich market context string
+  var mktCtx = [
+    'BTC: ' + fp(prices.btc) + ' (' + (btcC>=0?'+':'') + btcC + '% 24h)',
+    'ETH: ' + fp(prices.eth) + ' (' + (parseFloat(prices.ethC||0)>=0?'+':'') + parseFloat(prices.ethC||0).toFixed(2) + '%)',
+    'SOL: ' + fp(prices.sol) + ' (' + (parseFloat(prices.solC||0)>=0?'+':'') + parseFloat(prices.solC||0).toFixed(2) + '%)',
+    'ICP: ' + fp(prices.icp,2),
+    'DOT: ' + fp(prices.dot,2),
+    'BOSON: ' + fp(prices.boson,4),
+    'Fear and Greed: ' + (prices.fng||'?') + '/100 (' + fgLabel(fng) + ')',
+    'BTC 24h volume: ' + fvol(prices.btcV),
+    'BTC market cap: ' + fmc(prices.btcMC)
+  ].join(' | ');
 
   if (k && prices.btc) {
-    const prompt = `You are the social media manager for NeuralAlpha — a crypto intelligence brand.
-Brand promise: "Crypto alpha before it happens. AI-driven on-chain signals. Funding flows & market intelligence."
-Tagline: "We see what isn't said."
 
-Live market data:
-BTC: ${fp(prices.btc)} (${prices.btcC}% 24h)
-ETH: ${fp(prices.eth)} (${prices.ethC}% 24h)
-SOL: ${fp(prices.sol)} (${prices.solC}% 24h)
-ICP: ${fp(prices.icp,2)} | DOT: ${fp(prices.dot,2)} | BOSON: ${fp(prices.boson,4)}
-Fear & Greed: ${prices.fng||50}/100 (${fgLabel(fng)})
-Trending: ${prices.trending||'N/A'}
-Market assessment: ${analysisCache||'N/A'}
+    // ── MORNING POST ────────────────────────────────────────────────
+    var p1 = 'You are the voice of NeuralAlpha — a professional crypto intelligence brand.\n\n' +
+      'BRAND IDENTITY:\n' +
+      '- Promise: "Crypto alpha before it happens. AI-driven on-chain signals. Funding flows and market intelligence."\n' +
+      '- Tagline: "We see what isn\'t said."\n' +
+      '- Tone: No hype. No pump narratives. Raw data and pattern recognition only. Human voice, not robotic.\n' +
+      '- Always end with: "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n\n' +
+      'LIVE MARKET DATA (' + dateStr + '):\n' + mktCtx + '\n\n' +
+      'TODAY IS ' + today.toUpperCase() + ' — Theme: ' + xPlan.theme + '\n' +
+      (extra ? 'Extra context: ' + extra + '\n\n' : '\n') +
+      'WRITE THE MORNING POST (share at 08:00).\n\n' +
+      'STRUCTURE (follow this exactly):\n' +
+      '1. Open with ONE specific data point or price observation. Make it punchy. 1-2 sentences max.\n' +
+      '2. "But the number that actually matters right now isn\'t the price." — or similar pivot line.\n' +
+      '3. Give 2-3 specific on-chain or macro statistics that tell a deeper story. Use real numbers.\n' +
+      '4. Explain what that data signals — what is smart money doing vs what retail sees.\n' +
+      '5. Connect to todays theme: ' + xPlan.desc + '\n' +
+      '6. End with a sharp 1-sentence insight that reframes the narrative.\n' +
+      '7. "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n' +
+      '8. 5-7 hashtags on new line starting with #Bitcoin #BTC\n\n' +
+      'MAX 280 WORDS. Write in English. Be specific with data. No generic statements.';
 
-Today's X theme: ${xPlan.theme} — ${xPlan.desc}
-Today's Instagram theme: ${igPlan.theme} — ${igPlan.desc}
-${extra?'Extra context: '+extra:''}
+    // ── AFTERNOON POST ───────────────────────────────────────────────
+    var p2 = 'You are the voice of NeuralAlpha — a professional crypto intelligence brand.\n\n' +
+      'BRAND IDENTITY:\n' +
+      '- Tone: No hype. Raw data and pattern recognition. Human voice.\n' +
+      '- Always end with: "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n\n' +
+      'LIVE MARKET DATA (' + dateStr + '):\n' + mktCtx + '\n\n' +
+      'TODAY IS ' + today.toUpperCase() + ' — Theme: ' + xPlan.theme + '\n' +
+      (extra ? 'Extra context: ' + extra + '\n\n' : '\n') +
+      'WRITE THE AFTERNOON POST (share at 14:00).\n\n' +
+      'STRUCTURE (follow this exactly):\n' +
+      '1. Open with a surprising or underreported fact, event, or development happening right now. Something most people are NOT covering.\n' +
+      '2. Explain why it matters for crypto markets specifically.\n' +
+      '3. Connect it to institutional behavior, regulatory landscape, or macro forces.\n' +
+      '4. Draw a conclusion: what does this mean for smart money positioning?\n' +
+      '5. One closing line that reframes how the reader sees the situation.\n' +
+      '6. "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n' +
+      '7. 5-7 hashtags\n\n' +
+      'MAX 250 WORDS. Focus on: ' + xPlan.desc + '. Be specific. Cite real institutions, real events.';
 
-ALL POSTS MUST BE IN ENGLISH.
+    // ── EVENING POST ─────────────────────────────────────────────────
+    var p3 = 'You are the voice of NeuralAlpha — a professional crypto intelligence brand.\n\n' +
+      'BRAND IDENTITY:\n' +
+      '- Tone: Analytical, precise, slightly philosophical. No hype.\n' +
+      '- Always end with: "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n\n' +
+      'LIVE MARKET DATA (' + dateStr + '):\n' + mktCtx + '\n\n' +
+      'TODAY IS ' + today.toUpperCase() + ' — Theme: ' + xPlan.theme + '\n' +
+      (extra ? 'Extra context: ' + extra + '\n\n' : '\n') +
+      'WRITE THE EVENING POST (share at 20:00).\n\n' +
+      'STRUCTURE (follow this exactly):\n' +
+      '1. Open with a powerful observation: "The smart money doesn\'t watch price. It watches..." or similar.\n' +
+      '2. Identify 3 specific signals or catalysts smart money is watching RIGHT NOW this week.\n' +
+      '3. For each: name it, explain what it means, why it matters before retail notices.\n' +
+      '4. End with a forward-looking statement: what is the key date, event or threshold to watch next.\n' +
+      '5. "Neural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only."\n' +
+      '6. 5-7 hashtags\n\n' +
+      'MAX 280 WORDS. Be specific — name actual signals, dates, thresholds. No vague statements.';
 
-X_MORNING:
-[Max 280 chars. Morning market opening. Professional, direct. Max 3 hashtags. End with: Neural Alpha — We see what isn't said.]
+    // ── INSTAGRAM CAPTION ────────────────────────────────────────────
+    var p4 = 'You are the voice of NeuralAlpha on Instagram.\n\n' +
+      'BRAND IDENTITY:\n' +
+      '- Visual, educational, community-first. But still data-driven.\n' +
+      '- Tone: More accessible than X, but still sharp. Hook immediately.\n\n' +
+      'LIVE MARKET DATA (' + dateStr + '):\n' + mktCtx + '\n\n' +
+      'TODAY IS ' + today.toUpperCase() + ' — Instagram Theme: ' + igPlan.theme + ' — ' + igPlan.desc + '\n' +
+      (extra ? 'Extra context: ' + extra + '\n\n' : '\n') +
+      'WRITE THE INSTAGRAM CAPTION.\n\n' +
+      'STRUCTURE:\n' +
+      '1. Strong hook first line — make them stop scrolling.\n' +
+      '2. Tell a short story using today\'s market data. 3-4 punchy paragraphs.\n' +
+      '3. Include 2-3 specific data points from the live market data above.\n' +
+      '4. End with a question or CTA that drives comments (e.g. "What\'s your read?" or "Drop your take below").\n' +
+      '5. 10-12 niche hashtags on a new line.\n\n' +
+      '150-220 words. Write for mobile. Short paragraphs.';
 
-X_AFTERNOON:
-[Max 280 chars. Afternoon on-chain or breaking development. Max 3 hashtags.]
+    var results = await Promise.all([
+      callGemini(p1), callGemini(p2), callGemini(p3), callGemini(p4)
+    ]);
+    var r1 = results[0];
+    var r2 = results[1];
+    var r3 = results[2];
+    var r4 = results[3];
 
-X_EVENING:
-[Max 280 chars. Deep insight nobody else says. Max 3 hashtags. End with: Not financial advice. Pattern recognition only.]
-
-IG_CAPTION:
-[150-200 words. Storytelling, educational. Strong CTA. 10 niche hashtags on new line.]`;
-
-    const res = await callGemini(prompt);
-    if (res) {
-      x1 = res.match(/X_MORNING:\s*([\s\S]*?)(?=X_AFTERNOON:|$)/i)?.[1]?.trim() || '';
-      x2 = res.match(/X_AFTERNOON:\s*([\s\S]*?)(?=X_EVENING:|$)/i)?.[1]?.trim() || '';
-      x3 = res.match(/X_EVENING:\s*([\s\S]*?)(?=IG_CAPTION:|$)/i)?.[1]?.trim() || '';
-      ig = res.match(/IG_CAPTION:\s*([\s\S]*?)$/i)?.[1]?.trim() || '';
-    }
+    if (r1) x1 = r1.trim();
+    if (r2) x2 = r2.trim();
+    if (r3) x3 = r3.trim();
+    if (r4) ig = r4.trim();
   }
 
-  // Fallback
-  if (!x1) x1 = `Bitcoin is holding at ${fp(prices.btc)} this morning.\n\nFear & Greed: ${prices.fng||'?'}/100 — ${fgLabel(fng)}.\n\n${btcC>1?'On-chain data shows whale accumulation continuing. The signal is in the data, not the headlines.':'Long-term holders are reducing sell pressure. Watch key levels closely.'}\n\nNeural Alpha — We see what isn't said.\n\n#Bitcoin #OnChain #NeuralAlpha`;
-  if (!x2) x2 = `${xPlan.theme.toUpperCase()} — ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}\n\nETH: ${fp(prices.eth)} | SOL: ${fp(prices.sol)} | ICP: ${fp(prices.icp,2)}\n\n${prices.trending?`Trending narratives: ${prices.trending}.`:'Monitoring funding rates and exchange flows closely.'}\n\nThe signal is in the data, not the headlines.\n\n#CryptoAlpha #NeuralAlpha #OnChain`;
-  if (!x3) x3 = `Nobody is talking about this.\n\nWhen Fear & Greed reads ${prices.fng||'?'}, the pattern historically points to one direction — and it's not the one retail expects.\n\nSmart money is positioning quietly.\n\nWe track what they do, not what they say.\n\nNeural Alpha — We see what isn't said.\nNot financial advice. Pattern recognition only.\n\n#Bitcoin #SmartMoney #NeuralAlpha`;
-  if (!ig) ig = `📡 ${igPlan.theme.toUpperCase()}\n\nBTC is trading at ${fp(prices.btc)} with ${btcC>=0?'+':''}${btcC}% in the last 24 hours.\n\nFear & Greed Index: ${prices.fng||'?'}/100 — ${fgLabel(fng)} territory.\n\n${analysisCache||'On-chain signals are sending important data. The market rarely tells you the full story through price alone.'}\n\nWhat is your read on the market right now? Drop it in the comments 👇\n\n#CryptoAlpha #Bitcoin #OnChainAnalysis #NeuralAlpha #CryptoIntelligence #BTCAnalysis #CryptoSignals #MarketUpdate #SmartMoney #Web3`;
+  // ── FALLBACKS (no API key) ───────────────────────────────────────
+  if (!x1) {
+    x1 = 'Bitcoin is trading at ' + fp(prices.btc) + ' this morning.\n\nBut the number that actually matters right now isn\'t the price.\n\nFear and Greed is reading ' + (prices.fng||'?') + '/100 — ' + fgLabel(fng) + '. ' + (btcC < 0 ? 'Long-term holder selling dropped 87% in six weeks. The hands that matter most are quietly stopping. The price hasn\'t caught up yet.' : 'Exchange balances are declining. Long-term holder accumulation is building. Stablecoin supply sitting on the sidelines is rising.') + '\n\nThe on-chain picture is telling a different story than the headlines.\n\nNeural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only.\n#Bitcoin #BTC #OnChain #SmartMoney #NeuralAlpha';
+  }
+  if (!x2) {
+    x2 = xPlan.theme.toUpperCase() + ' — ' + dateStr + '\n\n' + (btcC < -1 ? 'ETH is at ' + fp(prices.eth) + '. SOL at ' + fp(prices.sol) + '. The divergence between what institutions are doing and what price is showing has rarely been this wide.\n\nFor every VC dollar invested in crypto in 2025 — 40 cents went to a company also building AI products. Up from 18 cents the year before.\n\nThe money isn\'t choosing between AI and crypto. It\'s betting on both.' : 'Institutional flows are returning. ETH at ' + fp(prices.eth) + ' with volume at ' + fvol(prices.ethV) + '.\n\nThe infrastructure is being built while retail waits for permission to be bullish.') + '\n\nNeural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only.\n#Bitcoin #Institutional #OnChain #NeuralAlpha';
+  }
+  if (!x3) {
+    x3 = 'The smart money doesn\'t watch price. It watches the signals that move before price does.\n\nHere\'s what it\'s tracking right now — ' + dateStr + ':\n\nBTC Fear and Greed: ' + (prices.fng||'?') + '/100. ' + (fng < 30 ? 'Extreme Fear historically marks accumulation zones — not capitulation. Every prior cycle that looked like this ended the same way.' : fng > 70 ? 'Greed is peaking. Smart money is preparing exits while retail chases.' : 'Neutral territory. The market is coiling. Low volatility doesn\'t last.') + '\n\nVolume: ' + fvol(prices.btcV) + ' today. Watch for a spike — that\'s when the positioning becomes visible.\n\nNeural Alpha — We see what isn\'t said. Not financial advice. Pattern recognition only.\n#Bitcoin #BTC #OnChain #SmartMoney #NeuralAlpha';
+  }
+  if (!ig) {
+    ig = fgLabel(fng) + '.\n\nBTC is at ' + fp(prices.btc) + '. Fear and Greed reads ' + (prices.fng||'?') + '/100.\n\n' + (btcC < 0 ? 'When prices fall, two things happen simultaneously. Retail panics and sells. Institutions quietly accumulate. This gap between what retail feels and what institutions do — that\'s the signal.' : 'Momentum is building. On-chain data shows accumulation patterns consistent with previous cycle recoveries.') + '\n\nThe on-chain foundation being built right now is the same one that preceded every previous recovery.\n\nWhat\'s your read on where we go from here? Drop it below.\n\n#CryptoAlpha #Bitcoin #OnChainAnalysis #NeuralAlpha #CryptoIntelligence #BTCAnalysis #SmartMoney #Web3 #CryptoSignals #MarketUpdate';
+  }
 
   document.getElementById('x1').textContent = x1;
   document.getElementById('x2').textContent = x2;
   document.getElementById('x3').textContent = x3;
   document.getElementById('ig1').textContent = ig;
 
-  // Hide old arabic translations
-  ['ar1','ar2','ar3','ar-ig'].forEach(id => { const el=document.getElementById(id); el.style.display='none'; el.textContent=''; });
+  ['ar1','ar2','ar3','ar-ig'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+    el.textContent = '';
+  });
+  ['img-msg-x1','img-msg-x2','img-msg-x3','img-msg-ig1'].forEach(function(id){
+    document.getElementById(id).style.display='none';
+  });
 
-  // Hashtags
   renderHashtags(xPlan.type, igPlan.type);
-
   document.getElementById('posts-out').style.display = 'block';
   document.getElementById('gen-btn').disabled = false;
   document.getElementById('gen-ld').style.display = 'none';
 }
 
-// ─── HASHTAG OPTIMIZER ───────────────────
 function renderHashtags(xType, igType) {
-  const base = ['#NeuralAlpha','#Bitcoin','#BTC','#Crypto','#OnChain','#CryptoAlpha','#SmartMoney','#Web3','#CryptoIntel'];
-  const typeMap = {
-    onchain: ['#OnChainAnalysis','#WhaleAlert','#GlassNode','#CryptoSignals','#ChainAnalysis'],
-    macro: ['#MacroCrypto','#BitcoinMacro','#GlobalMarkets','#Inflation','#DollarIndex'],
-    ai: ['#AICrypto','#DeAI','#AIAgents','#Bittensor','#CryptoInfrastructure'],
-    alpha: ['#AlphaSignal','#CryptoAlpha','#TradingSignals','#AltSeason','#CryptoTrading'],
-    educational: ['#CryptoEducation','#LearnCrypto','#CryptoBeginner','#BlockchainBasics','#CryptoTips'],
-    recap: ['#CryptoWeekly','#MarketUpdate','#WeeklyRecap','#CryptoNews','#MarketSummary'],
+  var base = ['#NeuralAlpha','#Bitcoin','#BTC','#Crypto','#OnChain','#CryptoAlpha','#SmartMoney','#Web3','#CryptoIntel'];
+  var typeMap = {
+    onchain: ['#OnChainAnalysis','#WhaleAlert','#GlassNode','#CryptoSignals'],
+    macro: ['#MacroCrypto','#BitcoinMacro','#GlobalMarkets','#Inflation'],
+    ai: ['#AICrypto','#DeAI','#AIAgents','#Bittensor'],
+    alpha: ['#AlphaSignal','#CryptoAlpha','#TradingSignals','#AltSeason'],
+    educational: ['#CryptoEducation','#LearnCrypto','#CryptoBeginner'],
+    recap: ['#CryptoWeekly','#MarketUpdate','#WeeklyRecap']
   };
-  const extra = typeMap[xType] || typeMap[igType] || [];
-  const all = [...new Set([...base, ...extra])].slice(0, 18);
-  document.getElementById('hashtags').innerHTML = all.map(h =>
-    `<span class="htag" onclick="cpText('${h}')" title="Klik for at kopiere">${h}</span>`
-  ).join('');
+  var extra = typeMap[xType] || typeMap[igType] || [];
+  var all = base.concat(extra).slice(0, 16);
+  document.getElementById('hashtags').innerHTML = all.map(function(h) {
+    return '<span class="htag" onclick="cpText(\'' + h + '\')">' + h + '</span>';
+  }).join('');
 }
 
 function cpText(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    const tmp = event.target;
-    const orig = tmp.textContent;
-    tmp.textContent = '✓';
-    tmp.style.background = 'rgba(0,255,136,.15)';
-    setTimeout(() => { tmp.textContent = orig; tmp.style.background = ''; }, 1000);
-  });
+  navigator.clipboard.writeText(text);
+  var tmp = event.target;
+  var orig = tmp.textContent;
+  tmp.textContent = 'OK';
+  setTimeout(function() { tmp.textContent = orig; }, 1000);
 }
 
-// ─── IMAGE GENERATION ────────────────────
-async function genImage(postId, theme) {
-  const key = localStorage.getItem('gemini_key');
-  const phId = 'img-' + postId;
-  const imgId = 'imgprev-' + postId;
-  const ph = document.getElementById(phId);
-  const img = document.getElementById(imgId);
-
-  ph.style.display = 'block';
-  ph.textContent = '⏳ Genererer billede...';
-  img.style.display = 'none';
-
+async function genImage(postId) {
+  var key = localStorage.getItem('gemini_key');
+  var msgEl = document.getElementById('img-msg-' + postId);
+  msgEl.style.display = 'block';
   if (!key) {
-    ph.textContent = '⚠️ Gemini API-nøgle mangler — tilføj den under Indstillinger for at generere billeder.';
+    msgEl.textContent = 'Tilfoej Gemini API-noegle under Indstillinger.';
+    msgEl.className = 'alert alert-warn';
     return;
   }
-
-  // Imagen via Gemini API
+  msgEl.textContent = 'Genererer billede...';
+  msgEl.className = 'alert alert-info';
+  var postText = document.getElementById(postId).textContent.substring(0, 200);
+  var prompt = 'Professional dark-themed crypto finance social media image for NeuralAlpha. Dark background, cyan and purple accents, futuristic data visualization. No text. Context: ' + postText;
   try {
-    const postText = document.getElementById(postId).textContent.substring(0, 200);
-    const prompt = `Create a professional, dark-themed crypto/finance social media image for NeuralAlpha brand.
-Style: Dark background (#06080d), cyan (#00e5ff) and purple accents, futuristic data visualization aesthetic.
-Theme: ${theme}
-Context: ${postText}
-The image should feel like a Bloomberg terminal meets cyberpunk. No text in the image. Focus on abstract data, charts, network nodes, or financial visuals.`;
-
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${key}`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        instances: [{prompt}],
-        parameters: {sampleCount: 1, aspectRatio: '1:1'}
-      })
+    var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=' + key, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({instances:[{prompt:prompt}], parameters:{sampleCount:1, aspectRatio:'1:1'}})
     });
-    const d = await r.json();
-    const b64 = d.predictions?.[0]?.bytesBase64Encoded;
+    var d = await r.json();
+    var b64 = d.predictions && d.predictions[0] && d.predictions[0].bytesBase64Encoded;
     if (b64) {
+      var img = document.createElement('img');
       img.src = 'data:image/png;base64,' + b64;
-      img.style.display = 'block';
-      ph.style.display = 'none';
+      img.style.cssText = 'width:100%;border-radius:8px;margin-top:10px;border:1px solid var(--border)';
+      document.getElementById(postId).after(img);
+      msgEl.style.display = 'none';
+    } else { throw new Error('no image'); }
+  } catch(e) {
+    msgEl.textContent = 'Billede ikke tilgaengeligt. Canva prompt: "Dark crypto finance dashboard cyan purple NeuralAlpha"';
+    msgEl.className = 'alert alert-warn';
+  }
+}
+
+async function translatePost(srcId, destId) {
+  var src = document.getElementById(srcId).textContent;
+  var dest = document.getElementById(destId);
+  if (!src.trim()) {
+    dest.style.display = 'block';
+    dest.textContent = 'Ingen tekst at oversaette. Genereer posts forst.';
+    return;
+  }
+  dest.style.display = 'block';
+  dest.textContent = 'Overstaetter til arabisk...';
+  dest.className = 'post-box arabic';
+  var key = localStorage.getItem('gemini_key');
+  if (!key) {
+    dest.innerHTML = '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--warn)">Ingen API-noegle fundet.</span> <a href="https://translate.google.com/?sl=en&tl=ar&text=' + encodeURIComponent(src) + '" target="_blank" style="color:var(--accent)">Oversaet i Google Translate</a>';
+    return;
+  }
+  // Direct API call with explicit short prompt
+  try {
+    var models = ['gemini-2.0-flash','gemini-1.5-flash','gemini-pro'];
+    var translated = null;
+    for (var mi = 0; mi < models.length; mi++) {
+      try {
+        dest.textContent = 'Proever ' + models[mi] + '...';
+        var r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + models[mi] + ':generateContent?key=' + key, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            contents:[{parts:[{text:'Translate the following English text to Arabic. Keep hashtags in English. Keep emojis. Output ONLY the Arabic translation:\n\n' + src.substring(0,1500)}]}],
+            generationConfig:{temperature:0.3, maxOutputTokens:1500}
+          })
+        });
+        var d = await r.json();
+        console.log('Gemini response (' + models[mi] + '):', JSON.stringify(d).substring(0,300));
+        if (d.candidates && d.candidates[0] && d.candidates[0].content) {
+          translated = d.candidates[0].content.parts[0].text;
+          break;
+        }
+        if (d.error) {
+          dest.textContent = 'Model ' + models[mi] + ' fejl: ' + d.error.message + '. Proever naeste...';
+          continue;
+        }
+        // Handle safety block
+        if (d.candidates && d.candidates[0] && d.candidates[0].finishReason === 'SAFETY') {
+          dest.textContent = 'Blokeret af sikkerhedsfilter. Proever naeste model...';
+          continue;
+        }
+      } catch(e) {
+        dest.textContent = 'Netvaerksfejl: ' + e.message;
+      }
+    }
+    if (translated) {
+      dest.textContent = translated;
     } else {
-      throw new Error('Ingen billeddata returneret');
+      // Show the actual last API response for debugging
+      dest.innerHTML = '<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--warn)">Tjek console (F12) for detaljer.</span><br><a href="https://translate.google.com/?sl=en&tl=ar&text=' + encodeURIComponent(src.substring(0,500)) + '" target="_blank" style="color:var(--accent)">Oversaet i Google Translate</a>';
     }
   } catch(e) {
-    ph.textContent = '⚠️ Billedgenerering kræver Imagen API adgang. Alternativt: brug Canva eller Midjourney med prompt: "Dark crypto finance dashboard, cyan and purple accents, futuristic data visualization, NeuralAlpha brand, ' + theme + '"';
+    dest.innerHTML = '<a href="https://translate.google.com/?sl=en&tl=ar&text=' + encodeURIComponent(src.substring(0,500)) + '" target="_blank" style="color:var(--accent)">Abn i Google Translate</a>';
   }
 }
 
-// ─── TRANSLATE TO ARABIC ─────────────────
-async function translatePost(srcId, destId) {
-  const src = document.getElementById(srcId).textContent;
-  const dest = document.getElementById(destId);
-  if (!src.trim()) return;
-
-  dest.style.display = 'block';
-  dest.textContent = '⏳ Oversætter til arabisk...';
-
-  const key = localStorage.getItem('gemini_key');
-  if (key) {
-    const prompt = `Translate the following social media post to Arabic. Keep all hashtags in English. Maintain the professional tone. Keep emojis. Only output the translated text, nothing else.\n\n${src}`;
-    const res = await callGemini(prompt);
-    if (res) { dest.textContent = res; return; }
-  }
-
-  // Fallback: Google Translate link
-  dest.innerHTML = `<span style="color:var(--warn)">⚠️ Tilføj Gemini API-nøgle for automatisk oversættelse.</span><br><br><a href="https://translate.google.com/?sl=en&tl=ar&text=${encodeURIComponent(src)}" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;">🔗 Åbn i Google Translate →</a>`;
-}
-
-// ─── COPY ────────────────────────────────
 function cp(id) {
-  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
-    const btns = document.querySelectorAll('.copy-btn');
-    btns.forEach(b => { if (b.getAttribute('onclick') === `cp('${id}')`) { b.textContent = 'KOPIERET!'; setTimeout(() => b.textContent = 'COPY', 1500); }});
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(function() {
+    document.querySelectorAll('.copy-btn').forEach(function(b) {
+      if (b.getAttribute('onclick') === "cp('" + id + "')") {
+        b.textContent = 'KOPIERET!';
+        setTimeout(function() { b.textContent = 'COPY'; }, 1500);
+      }
+    });
   });
 }
 
-// ─── HISTORY ─────────────────────────────
 function savePosts() {
-  const entry = {
+  var entry = {
     date: new Date().toLocaleDateString('da-DK',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
     x1: document.getElementById('x1').textContent,
     x2: document.getElementById('x2').textContent,
@@ -772,114 +1296,114 @@ function savePosts() {
     ig: document.getElementById('ig1').textContent,
     btc: fp(prices.btc)
   };
-  postHistory.unshift(entry);
-  if (postHistory.length > 30) postHistory.pop();
-  localStorage.setItem('post_history', JSON.stringify(postHistory));
-  alert('✅ Posts gemt til historik!');
+  var history = JSON.parse(localStorage.getItem('post_history') || '[]');
+  history.unshift(entry);
+  if (history.length > 30) history.pop();
+  localStorage.setItem('post_history', JSON.stringify(history));
+  alert('Posts gemt til historik!');
 }
 
 function renderHistory() {
-  const el = document.getElementById('history-list');
-  if (!postHistory.length) { el.innerHTML = '<div style="color:var(--muted2);font-family:\'DM Mono\',monospace;font-size:12px;">Ingen gemte posts endnu.</div>'; return; }
-  el.innerHTML = postHistory.map((e, i) => `
-    <div class="history-item" onclick="expandHistory(${i})">
-      <div class="history-meta">${e.date} — BTC: ${e.btc}</div>
-      <div class="history-preview">${e.x1.substring(0,80)}...</div>
-    </div>
-  `).join('');
+  var el = document.getElementById('history-list');
+  var history = JSON.parse(localStorage.getItem('post_history') || '[]');
+  if (!history.length) {
+    el.innerHTML = '<div style="color:var(--muted2);font-family:DM Mono,monospace;font-size:12px">Ingen gemte posts endnu.</div>';
+    return;
+  }
+  el.innerHTML = history.map(function(e, i) {
+    return '<div class="history-item" onclick="expandHistory(' + i + ')"><div class="history-meta">' + e.date + ' — BTC: ' + e.btc + '</div><div class="history-preview">' + (e.x1||'').substring(0,80) + '...</div></div>';
+  }).join('');
 }
 
 function expandHistory(i) {
-  const e = postHistory[i];
-  const w = window.open('', '_blank', 'width=700,height=600');
-  w.document.write(`<html><body style="background:#0f1420;color:#dce6f5;font-family:monospace;padding:20px;white-space:pre-wrap;">
-<h3 style="color:#00e5ff">${e.date} — BTC: ${e.btc}</h3>
-<h4>𝕏 MORGEN:</h4><p>${e.x1}</p>
-<h4>𝕏 EFTERMIDDAG:</h4><p>${e.x2}</p>
-<h4>𝕏 AFTEN:</h4><p>${e.x3}</p>
-<h4>📸 INSTAGRAM:</h4><p>${e.ig}</p>
-</body></html>`);
+  var history = JSON.parse(localStorage.getItem('post_history') || '[]');
+  var e = history[i];
+  var w = window.open('', '_blank', 'width=700,height=600');
+  w.document.write('<html><body style="background:#0f1420;color:#dce6f5;font-family:monospace;padding:20px;white-space:pre-wrap"><h3 style="color:#00e5ff">' + e.date + ' — BTC: ' + e.btc + '</h3><h4>MORGEN:</h4><p>' + e.x1 + '</p><h4>EFTERMIDDAG:</h4><p>' + e.x2 + '</p><h4>AFTEN:</h4><p>' + e.x3 + '</p><h4>INSTAGRAM:</h4><p>' + e.ig + '</p></body></html>');
 }
 
 function clearHistory() {
   if (!confirm('Ryd al post-historik?')) return;
-  postHistory = [];
   localStorage.removeItem('post_history');
   renderHistory();
 }
 
-// ─── TIMERS ──────────────────────────────
+var timersStarted = false;
 function startTimers() {
+  if (timersStarted) return;
+  timersStarted = true;
   updateTimers();
   setInterval(updateTimers, 1000);
 }
 
 function updateTimers() {
-  const now = new Date();
-  document.getElementById('current-time').textContent = now.toLocaleString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  [['t-morning',8],['t-afternoon',14],['t-evening',20]].forEach(([id,h]) => {
-    const target = new Date();
+  var now = new Date();
+  var timeEl = document.getElementById('current-time');
+  if (timeEl) timeEl.textContent = now.toLocaleString('da-DK',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  [[8,'t-morning'],[14,'t-afternoon'],[20,'t-evening']].forEach(function(pair) {
+    var h = pair[0]; var id = pair[1];
+    var target = new Date();
     target.setHours(h,0,0,0);
     if (now > target) target.setDate(target.getDate()+1);
-    const diff = target - now;
-    const hh = Math.floor(diff/3600000);
-    const mm = Math.floor((diff%3600000)/60000);
-    const ss = Math.floor((diff%60000)/1000);
-    const el = document.getElementById(id);
-    if (el) el.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+    var diff = target - now;
+    var hh = Math.floor(diff/3600000);
+    var mm = Math.floor((diff%3600000)/60000);
+    var ss = Math.floor((diff%60000)/1000);
+    var el = document.getElementById(id);
+    if (el) el.textContent = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
   });
 }
 
-// ─── PLANNER ─────────────────────────────
 function renderPlanner() {
-  const todayIdx = getTodayIdx();
-  const dayNames = ['SØN','MAN','TIR','ONS','TOR','FRE','LØR'];
-  document.getElementById('week-grid').innerHTML = WEEKLY_X.map((x,i) => `
-    <div class="day-col ${i===todayIdx?'today':''}">
-      <div class="day-name">${dayNames[i]}${i===todayIdx?' ●':''}</div>
-      <span class="day-tag tag-x">𝕏 ${x.theme}</span>
-      <span class="day-tag tag-ig">📸 ${WEEKLY_IG[i].theme}</span>
-    </div>`).join('');
-  document.getElementById('week-detail').innerHTML = WEEKLY_X.map((x,i) => `
-    <div class="sig-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px;${i===todayIdx?'border-color:rgba(0,229,255,.3);':''}">
-      <div style="font-weight:700;font-size:13px;">${dayNames[i]}${i===todayIdx?' <span class="tag tag-bull">I DAG</span>':''}</div>
-      <div style="font-size:12px;">𝕏 <b>${x.theme}</b> — <span style="color:var(--muted2)">${x.desc}</span></div>
-      <div style="font-size:12px;">📸 <b style="color:#e1306c">${WEEKLY_IG[i].theme}</b> — <span style="color:var(--muted2)">${WEEKLY_IG[i].desc}</span></div>
-    </div>`).join('');
+  var todayIdx = getTodayIdx();
+  var dayNames = ['SON','MAN','TIR','ONS','TOR','FRE','LOR'];
+  document.getElementById('week-grid').innerHTML = WEEKLY_X.map(function(x, i) {
+    return '<div class="day-col ' + (i===todayIdx?'today':'') + '"><div class="day-name">' + dayNames[i] + (i===todayIdx?' *':'') + '</div><span class="day-tag tag-x">X: ' + x.theme + '</span><span class="day-tag tag-ig">IG: ' + WEEKLY_IG[i].theme + '</span></div>';
+  }).join('');
+  document.getElementById('week-detail').innerHTML = WEEKLY_X.map(function(x, i) {
+    return '<div class="sig-row" style="flex-direction:column;align-items:flex-start;gap:4px;margin-bottom:8px' + (i===todayIdx?';border-color:rgba(0,229,255,.3)':'') + '"><div style="font-weight:700;font-size:13px">' + dayNames[i] + (i===todayIdx?' (I DAG)':'') + '</div><div style="font-size:12px">X: <b>' + x.theme + '</b> — <span style="color:var(--muted2)">' + x.desc + '</span></div><div style="font-size:12px">IG: <b style="color:#e1306c">' + WEEKLY_IG[i].theme + '</b> — <span style="color:var(--muted2)">' + WEEKLY_IG[i].desc + '</span></div></div>';
+  }).join('');
 }
 
-// ─── SETTINGS ────────────────────────────
-function togKey() { const i=document.getElementById('api-key'); i.type=i.type==='password'?'text':'password'; event.target.textContent=i.type==='password'?'VIS':'SKJUL'; }
-function saveKey() {
-  const k=document.getElementById('api-key').value.trim();
-  if(!k) return;
-  localStorage.setItem('gemini_key',k);
-  document.getElementById('key-st').textContent='✓ GEMT';
-  document.getElementById('key-st').style.color='var(--green)';
+function togKey() {
+  var inp = document.getElementById('api-key');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  event.target.textContent = inp.type === 'password' ? 'VIS' : 'SKJUL';
 }
+
+function saveKey() {
+  var k = document.getElementById('api-key').value.trim();
+  if (!k) return;
+  localStorage.setItem('gemini_key', k);
+  document.getElementById('key-st').textContent = 'GEMT';
+  document.getElementById('key-st').style.color = 'var(--green)';
+}
+
 function saveManual() {
   prices = {
-    btc:document.getElementById('man-btc').value, btcC:document.getElementById('man-btc-c').value,
-    eth:document.getElementById('man-eth').value, ethC:document.getElementById('man-eth-c').value,
-    sol:document.getElementById('man-sol').value,
-    boson:document.getElementById('man-boson').value,
-    icp:document.getElementById('man-icp').value,
-    dot:document.getElementById('man-dot').value,
-    fng:document.getElementById('man-fng').value,
-    fngLabel:fgLabel(document.getElementById('man-fng').value),
-    trending:document.getElementById('man-trend').value
+    btc: document.getElementById('man-btc').value,
+    eth: document.getElementById('man-eth').value,
+    sol: document.getElementById('man-sol').value,
+    btcC: document.getElementById('man-btc-c').value,
+    fng: document.getElementById('man-fng').value,
+    fngLabel: fgLabel(document.getElementById('man-fng').value),
+    trending: document.getElementById('man-trend').value,
+    boson: document.getElementById('man-boson').value,
+    icp: document.getElementById('man-icp').value,
+    dot: document.getElementById('man-dot').value
   };
-  localStorage.setItem('manual_prices',JSON.stringify(prices));
+  localStorage.setItem('manual_prices', JSON.stringify(prices));
   updateUI();
-  setAlert('ok','✅ Manuelle priser gemt og opdateret.');
-  document.getElementById('live-status').textContent='MANUELT';
-  alert('✅ Priser gemt!');
+  alert('Priser gemt!');
 }
 
-// ─── INIT ────────────────────────────────
-window.addEventListener('load', () => {
-  const k=localStorage.getItem('gemini_key');
-  if(k){ document.getElementById('api-key').value=k; document.getElementById('key-st').textContent='✓ NØGLE INDLÆST'; document.getElementById('key-st').style.color='var(--green)'; }
+window.addEventListener('load', function() {
+  var k = localStorage.getItem('gemini_key');
+  if (k) {
+    document.getElementById('api-key').value = k;
+    document.getElementById('key-st').textContent = 'NOEGLE INDLAEDT';
+    document.getElementById('key-st').style.color = 'var(--green)';
+  }
   setTodayTheme();
   renderPlanner();
   fetchPrices();
